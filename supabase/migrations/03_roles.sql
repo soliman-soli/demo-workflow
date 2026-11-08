@@ -17,3 +17,4 @@ create table if not exists public.roles (
 );
 
 create index if not exists idx_roles_is_open on public.roles (is_open);
+

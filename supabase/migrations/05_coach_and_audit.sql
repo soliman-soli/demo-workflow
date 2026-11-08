@@ -37,3 +37,4 @@ create index if not exists idx_hr_actions_audit_candidate_id
   on public.hr_actions_audit (candidate_id);
 create index if not exists idx_hr_actions_audit_created_at
   on public.hr_actions_audit (created_at desc);
+

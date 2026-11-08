@@ -167,3 +167,4 @@ values
     null
   )
 on conflict (candidate_id) do nothing;
+

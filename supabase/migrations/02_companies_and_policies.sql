@@ -44,3 +44,4 @@ from public.companies c
 left join public.company_policies p on p.company_id = c.id
 group by c.id, c.name
 order by c.name asc;
+

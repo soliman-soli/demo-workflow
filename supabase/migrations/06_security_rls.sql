@@ -43,3 +43,4 @@ create policy "Service role full access on coach_sessions"
 
 create policy "Service role full access on hr_actions_audit"
   on public.hr_actions_audit for all to service_role using (true) with check (true);
+

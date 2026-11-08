@@ -78,3 +78,4 @@ select
   count(*) filter (where status = 'interview_invited')::int as interview_invited,
   coalesce(round(avg(score))::int, 0) as avg_score
 from public.candidates;
+
