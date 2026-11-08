@@ -1,69 +1,173 @@
-import Image from "next/image";
+import Link from "next/link";
+import { ArrowRight, ArrowUpRight, Mail } from "lucide-react";
+import { GithubIcon, LinkedinIcon } from "@/components/brand-icons";
+import { siteConfig, type Project } from "@/site.config";
+import { ProjectThumb } from "@/components/project-thumb";
+import { Badge, Tag } from "@/components/ui/badge";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
-export default function Home() {
+export default function HomePage() {
+  const { hero, about, contact, projects } = siteConfig;
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
+    <div className="mx-auto max-w-[1120px] px-4 sm:px-6">
+      {/* Hero */}
+      <section className="grid grid-cols-12 gap-6 pb-16 pt-16 sm:pt-24 md:pb-24" aria-labelledby="hero-title">
+        <div className="col-span-12 lg:col-span-9">
+          <p className="label-caps mb-5">{hero.eyebrow}</p>
+          <h1 id="hero-title" className="text-[2.25rem] leading-[1.1] font-medium sm:text-5xl lg:text-[4rem] lg:leading-[1.05]">
+            {hero.headline}
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+          <p className="mt-6 max-w-2xl text-base leading-relaxed text-muted sm:text-lg">{hero.sub}</p>
+          <div className="mt-9 flex flex-wrap gap-3">
+            <Link href="#projects" className={buttonVariants({ size: "lg" })}>
+              See projects <ArrowRight className="h-4 w-4" aria-hidden />
+            </Link>
+            <Link href="#contact" className={buttonVariants({ variant: "outline", size: "lg" })}>
+              Contact
+            </Link>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </section>
+
+      {/* Projects */}
+      <section id="projects" className="border-t border-border py-16 md:py-20" aria-labelledby="projects-title">
+        <div className="mb-8 flex items-end justify-between gap-4">
+          <h2 id="projects-title" className="text-3xl font-medium">
+            Projects
+          </h2>
+          <p className="hidden text-sm text-muted sm:block">One live demo, more on the way.</p>
         </div>
-      </main>
+        <ul className="grid gap-6 md:grid-cols-2">
+          {projects.map((p) => (
+            <li key={p.title}>
+              <ProjectCard project={p} />
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      {/* About */}
+      <section id="about" className="grid grid-cols-12 gap-6 border-t border-border py-16 md:py-20" aria-labelledby="about-title">
+        <h2 id="about-title" className="col-span-12 text-3xl font-medium md:col-span-4">
+          About
+        </h2>
+        <div className="col-span-12 md:col-span-8">
+          <p className="max-w-2xl text-base leading-relaxed text-muted">{about.intro}</p>
+          <dl className="mt-10 grid gap-x-8 gap-y-6 sm:grid-cols-2">
+            {about.skills.map((s) => (
+              <div key={s.group} className="border-t border-border pt-4">
+                <dt className="label-caps">{s.group}</dt>
+                <dd className="mt-2 text-sm leading-relaxed">{s.items.join(" · ")}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      </section>
+
+      {/* Contact */}
+      <section id="contact" className="grid grid-cols-12 gap-6 border-t border-border py-16 md:py-20" aria-labelledby="contact-title">
+        <h2 id="contact-title" className="col-span-12 text-3xl font-medium md:col-span-4">
+          Contact
+        </h2>
+        <div className="col-span-12 md:col-span-8">
+          <p className="max-w-xl text-base leading-relaxed text-muted">{contact.blurb}</p>
+          <ul className="mt-8 divide-y divide-border border-y border-border">
+            <ContactRow icon={<Mail className="h-4 w-4" />} label="Email" value={contact.email} href={`mailto:${contact.email}`} />
+            <ContactRow icon={<GithubIcon />} label="GitHub" value={contact.github.replace(/^https?:\/\/(www\.)?/, "")} href={contact.github} external />
+            <ContactRow icon={<LinkedinIcon />} label="LinkedIn" value={contact.linkedin.replace(/^https?:\/\/(www\.)?/, "")} href={contact.linkedin} external />
+          </ul>
+        </div>
+      </section>
     </div>
+  );
+}
+
+function ProjectCard({ project }: { project: Project }) {
+  const live = project.status === "live" && project.slug;
+
+  const inner = (
+    <>
+      <div className="relative aspect-[20/9] overflow-hidden border-b border-border">
+        <ProjectThumb motif={project.motif} />
+      </div>
+      <div className="flex flex-1 flex-col p-5 sm:p-6">
+        <div className="flex items-start justify-between gap-3">
+          <h3 className="text-xl font-medium">{project.title}</h3>
+          {live ? (
+            <Badge tone="accent">
+              <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden /> Live demo
+            </Badge>
+          ) : (
+            <Badge tone="neutral">In progress</Badge>
+          )}
+        </div>
+        <p className="mt-2 text-sm leading-relaxed text-muted">{project.description}</p>
+        <div className="mt-4 flex flex-wrap gap-1.5">
+          {project.tags.map((t) => (
+            <Tag key={t}>{t}</Tag>
+          ))}
+        </div>
+        <div className="mt-auto pt-5 text-sm">
+          {live ? (
+            <span className="inline-flex items-center gap-1 font-medium text-accent">
+              Open case study and demo <ArrowUpRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" aria-hidden />
+            </span>
+          ) : (
+            <span className="text-muted">Case study coming soon</span>
+          )}
+        </div>
+      </div>
+    </>
+  );
+
+  const base = "flex h-full flex-col overflow-hidden rounded-[var(--radius-card)] border border-border bg-surface";
+
+  if (live) {
+    return (
+      <Link
+        href={`/projects/${project.slug}`}
+        className={cn(base, "group transition-[transform,box-shadow,border-color] duration-200 ease-out hover:-translate-y-0.5 hover:shadow-[0_8px_24px_-12px_rgba(27,31,36,0.18)] hover:border-accent/40 focus-visible:-translate-y-0.5")}
+      >
+        {inner}
+      </Link>
+    );
+  }
+  return (
+    <article className={cn(base, "opacity-95")} aria-label={`${project.title} (in progress)`}>
+      {inner}
+    </article>
+  );
+}
+
+function ContactRow({
+  icon,
+  label,
+  value,
+  href,
+  external,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  href: string;
+  external?: boolean;
+}) {
+  return (
+    <li>
+      <a
+        href={href}
+        {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+        className="group flex items-center gap-4 py-4 transition-colors hover:text-accent"
+      >
+        <span className="text-muted group-hover:text-accent" aria-hidden>
+          {icon}
+        </span>
+        <span className="w-20 text-sm text-muted">{label}</span>
+        <span className="flex-1 truncate text-sm font-medium">{value}</span>
+        <ArrowUpRight className="h-4 w-4 text-muted group-hover:text-accent" aria-hidden />
+      </a>
+    </li>
   );
 }
