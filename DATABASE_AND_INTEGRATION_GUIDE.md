@@ -7,11 +7,26 @@ This guide covers everything you need to:
 
 ---
 
-## 1. SQL Database Schema (`supabase/schema.sql`)
+## 1. SQL Database Schema & Migration Files
 
-Even though the default architecture stores data via n8n in Google Sheets, moving to **Supabase (PostgreSQL)** gives you strict types, indexes, vector search (`pgvector`), and audit logs.
+Even though the default demo architecture stores data via n8n in Google Sheets, moving to **Supabase (PostgreSQL)** gives you strict types, indexes, vector search (`pgvector`), and audit logs.
 
-The full runnable SQL script is saved at [`supabase/schema.sql`](./supabase/schema.sql). You can paste it directly into the **Supabase SQL Editor** and click **Run**.
+The SQL code is provided in both **modular separate migration files** (in [`supabase/migrations/`](./supabase/migrations/)) and as a **single combined script** ([`supabase/schema.sql`](./supabase/schema.sql)).
+
+### Modular Files (`supabase/migrations/`)
+
+| File | Purpose | Key Objects |
+|---|---|---|
+| [`01_extensions.sql`](./supabase/migrations/01_extensions.sql) | Enables cryptographic functions and vector math | `pgcrypto`, `vector` |
+| [`02_companies_and_policies.sql`](./supabase/migrations/02_companies_and_policies.sql) | Companies, policy sections with vector index, and aggregate view | `companies`, `company_policies`, `company_policy_counts` |
+| [`03_roles.sql`](./supabase/migrations/03_roles.sql) | Open positions and requirements | `roles` |
+| [`04_candidates.sql`](./supabase/migrations/04_candidates.sql) | Candidate status enum, applications table, update trigger, pipeline stats view | `candidate_status`, `candidates`, `candidate_pipeline_stats` |
+| [`05_coach_and_audit.sql`](./supabase/migrations/05_coach_and_audit.sql) | Career coach session log and recruiter action audit log | `coach_sessions`, `hr_actions_audit` |
+| [`06_security_rls.sql`](./supabase/migrations/06_security_rls.sql) | Row Level Security policies for anon and service_role | Table RLS & security policies |
+| [`07_seed_data.sql`](./supabase/migrations/07_seed_data.sql) | Initial companies, policies, roles, and sample candidates | Seed data matching demo state |
+
+### Combined Script (`supabase/schema.sql`)
+If you prefer running everything in a single step in the **Supabase SQL Editor**, use [`supabase/schema.sql`](./supabase/schema.sql).
 
 ### Summary of Tables & Views
 
