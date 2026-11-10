@@ -7,8 +7,8 @@ const csp = [
   "default-src 'self'",
   // 'unsafe-inline' is needed for Next's inline bootstrap + next-themes; eval only in dev (HMR).
   `script-src 'self' 'unsafe-inline' ${isDev ? "'unsafe-eval'" : ""} ${turnstile}`,
-  "style-src 'self' 'unsafe-inline'",
-  "font-src 'self' data:",
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+  "font-src 'self' data: https://fonts.gstatic.com",
   "img-src 'self' data: blob:",
   "connect-src 'self'" + (isDev ? " ws: wss:" : ""),
   `frame-src ${turnstile}`,

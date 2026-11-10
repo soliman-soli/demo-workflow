@@ -43,6 +43,86 @@ export const MOCK_CHAT_NOT_FOUND: ChatResponse = {
   ],
 };
 
+export function getMockChatResponse(query: string): ChatResponse {
+  const lower = query.toLowerCase();
+
+  if (/(stock|equity|crypto|bitcoin|pet|dog|cat)/.test(lower)) {
+    return MOCK_CHAT_NOT_FOUND;
+  }
+
+  if (/(remote|wfh|home|hybrid|office|telecommute|location)/.test(lower)) {
+    return {
+      answer:
+        "Demo Co operates on a flexible hybrid policy. Team members are expected to collaborate from their local office 2 days per week (typically Tuesdays and Thursdays) and may work from home up to 3 days per week. Fully remote arrangements are available upon request with approval from your department lead after completing the 90-day probationary period.",
+      sources: ["Hybrid & Remote Work Policy 2026", "Employee Handbook v3.2 §4"],
+      found: true,
+      follow_ups: [
+        "Does Demo Co provide a home office equipment budget?",
+        "Can I work from another country temporarily?",
+        "What are core collaboration hours for remote work?",
+      ],
+    };
+  }
+
+  if (/(expense|claim|reimburse|receipt|travel|stipend|food|meal|per diem)/.test(lower)) {
+    return {
+      answer:
+        "All business-related expenses must be submitted via Expensify within 30 days of purchase with itemized receipts attached. Team members are eligible for a $50/month home-office internet stipend, and up to $75/person for approved client hospitality lunches. Approved claims are reimbursed directly with the subsequent monthly payroll cycle.",
+      sources: ["Expense & Travel Reimbursement Policy v2", "Finance Guidelines 2026"],
+      found: true,
+      follow_ups: [
+        "How do I set up my Expensify account?",
+        "What is the daily meal cap during company travel?",
+        "Who needs to approve expenses above $500?",
+      ],
+    };
+  }
+
+  if (/(hour|hours|schedule|time|overtime|shift|clock|core)/.test(lower)) {
+    return {
+      answer:
+        "Standard working hours at Demo Co are 40 hours per week, Monday to Friday. We support flexible scheduling around core collaboration hours between 10:00 AM and 4:00 PM local time. You can choose to start anywhere between 8:00 AM and 10:00 AM as long as team deliverables and standup meetings are attended.",
+      sources: ["Working Hours & Flexible Scheduling Policy", "Code of Conduct"],
+      found: true,
+      follow_ups: [
+        "How is overtime compensated for eligible team members?",
+        "Can I work a 4-day condensed work week?",
+        "How do I log hours if I am on an hourly contract?",
+      ],
+    };
+  }
+
+  if (/(probation|trial|new hire|onboard|first 90)/.test(lower)) {
+    return {
+      answer:
+        "The standard probationary period for all newly joined team members is 90 calendar days. A mid-point review is scheduled with your manager at day 45 to share feedback and address any hurdles. A formal confirmation check occurs at day 80, after which permanent employment status and benefits are confirmed.",
+      sources: ["Probation & Onboarding Policy", "HR Operational Manual 2026"],
+      found: true,
+      follow_ups: [
+        "Can I use paid annual leave during probation?",
+        "When does private health insurance coverage activate?",
+        "What happens if probation needs to be extended?",
+      ],
+    };
+  }
+
+  if (/(leave|holiday|vacation|pto|off|sick|maternity|paternity)/.test(lower)) {
+    return MOCK_CHAT_RESPONSE;
+  }
+
+  return {
+    answer:
+      `Demo Co maintains clear guidelines for our team. Regarding "${query.slice(0, 50)}", team members should refer to the general employee handbook or coordinate directly with their line manager. Full policy documents are accessible on the internal company drive.`,
+    sources: ["Employee Handbook v3.2", "Company Culture & Values Guide"],
+    found: true,
+    follow_ups: [
+      "How many annual leave days do I get?",
+      "Can I work remotely?",
+      "How do I claim expenses?",
+    ],
+  };
+}
+
 export const MOCK_ROLES: RolesResponse = {
   roles: [
     {

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { ChevronDown, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Field, Honeypot, Input, Textarea } from "@/components/ui/input";
-import { PdfDropzone } from "@/components/ui/pdf-dropzone";
+import { PdfDropzone, createSamplePdf } from "@/components/ui/pdf-dropzone";
 import { ErrorState, Notice } from "@/components/ui/states";
 import { TurnstileWidget } from "@/components/ui/turnstile";
 import { api } from "@/lib/hr/client";
@@ -127,6 +127,26 @@ export function CoachFlow() {
       className="mx-auto max-w-2xl space-y-6 rounded-[var(--radius-card)] border border-border bg-surface p-6 sm:p-8"
     >
       {apiError && <ErrorState message={apiError} onRetry={() => void submit()} />}
+
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border pb-3">
+        <div>
+          <h2 className="text-base font-medium">CV & Role Analysis</h2>
+          <p className="text-xs text-muted">Upload your resume to receive match score, gap analysis, and interview prep.</p>
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            setName("Alex Rivera");
+            setEmail("alex.rivera@example.com");
+            setRole("Full-Stack Software Engineer");
+            setCv(createSamplePdf());
+            setFieldErrors({});
+          }}
+          className="rounded-md border border-border bg-surface-2 px-2.5 py-1 text-xs font-medium text-accent transition-colors hover:border-accent/50"
+        >
+          Fill demo data
+        </button>
+      </div>
 
       <Honeypot name="hp_name" />
 

@@ -6,6 +6,11 @@ import { cn } from "@/lib/utils";
 
 export const MAX_PDF_BYTES = 4 * 1024 * 1024;
 
+export function createSamplePdf(): File {
+  const content = `%PDF-1.4\n1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R >>\nendobj\n4 0 obj\n<< /Length 75 >>\nstream\nBT\n/F1 14 Tf\n50 720 Td\n(Alex Rivera - Full Stack Engineer - TypeScript, Next.js, Node.js, PostgreSQL) Tj\nET\nendstream\nendobj\nxref\n0 5\n0000000000 65535 f \n0000000009 00000 n \n0000000058 00000 n \n0000000115 00000 n \n0000000206 00000 n \ntrailer\n<< /Size 5 /Root 1 0 R >>\nstartxref\n332\n%%EOF`;
+  return new File([content], "Alex_Rivera_Demo_CV.pdf", { type: "application/pdf" });
+}
+
 export function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
@@ -97,7 +102,19 @@ export function PdfDropzone({ file, onFile, error, label = "CV (PDF, max 4 MB)",
           <p className="text-sm">
             <span className="font-medium text-accent">Choose a PDF</span> or drag it here
           </p>
-          <p className="text-xs text-muted">PDF only, up to 4 MB</p>
+          <p className="text-xs text-muted">
+            PDF only, up to 4 MB ·{" "}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                accept(createSamplePdf());
+              }}
+              className="font-medium text-accent hover:underline focus:outline-none"
+            >
+              Use demo CV
+            </button>
+          </p>
         </div>
       )}
       <input

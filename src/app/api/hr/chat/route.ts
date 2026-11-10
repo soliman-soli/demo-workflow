@@ -3,7 +3,7 @@ import { n8nFetch, isMockMode } from "@/lib/hr/n8n-fetch";
 import { ChatRequestSchema, ChatResponseSchema } from "@/lib/hr/schemas";
 import { checkRateLimit } from "@/lib/hr/rate-limit";
 import { jsonError, sleep, tooManyRequests } from "@/lib/hr/http";
-import { MOCK_CHAT_NOT_FOUND, MOCK_CHAT_RESPONSE, MOCK_FAIL_TOKEN } from "@/lib/hr/mocks";
+import { getMockChatResponse, MOCK_FAIL_TOKEN } from "@/lib/hr/mocks";
 
 export const maxDuration = 60;
 
@@ -27,8 +27,7 @@ export async function POST(request: NextRequest) {
     await sleep(700);
     const lower = parsed.data.message.toLowerCase();
     if (lower.includes(MOCK_FAIL_TOKEN)) return jsonError("The assistant is unavailable right now.", 502);
-    if (/(stock|equity|crypto|pet)/.test(lower)) return NextResponse.json(MOCK_CHAT_NOT_FOUND);
-    return NextResponse.json(MOCK_CHAT_RESPONSE);
+    return NextResponse.json(getMockChatResponse(parsed.data.message));
   }
 
   const result = await n8nFetch("/hr/chat", {

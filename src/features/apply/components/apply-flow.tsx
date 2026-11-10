@@ -6,7 +6,7 @@ import { Briefcase, CheckCircle2, Loader2, MapPin } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Field, Honeypot, Input } from "@/components/ui/input";
-import { PdfDropzone } from "@/components/ui/pdf-dropzone";
+import { PdfDropzone, createSamplePdf } from "@/components/ui/pdf-dropzone";
 import { SkeletonCard } from "@/components/ui/skeleton";
 import { EmptyState, ErrorState } from "@/components/ui/states";
 import { TurnstileWidget } from "@/components/ui/turnstile";
@@ -225,6 +225,25 @@ export function ApplyFlow() {
               </ul>
             </div>
           )}
+
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border pb-3">
+            <p className="text-xs text-muted">Complete the form below or auto-fill with demo candidate data.</p>
+            <button
+              type="button"
+              onClick={() => {
+                setName("Alex Rivera");
+                setEmail("alex.rivera@example.com");
+                setLinkedin("https://www.linkedin.com/in/alex-rivera-swe");
+                setCv(createSamplePdf());
+                setConsent(true);
+                setFieldErrors({});
+                setApiErrors([]);
+              }}
+              className="rounded-md border border-border bg-surface-2 px-2.5 py-1 text-xs font-medium text-accent transition-colors hover:border-accent/50"
+            >
+              Fill demo data
+            </button>
+          </div>
 
           <Honeypot name="hp_email" />
 
