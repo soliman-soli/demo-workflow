@@ -487,12 +487,40 @@ export function getMockActionResponse(
   };
 }
 
+export const SHOWCASE_CANDIDATES: Candidate[] = [
+  {
+    ...MOCK_CANDIDATES[0],
+    candidate_id: "demo-001",
+    role: "Backend Engineer",
+  },
+  {
+    ...MOCK_CANDIDATES[1],
+    candidate_id: "demo-002",
+    role: "Frontend Engineer",
+  },
+  {
+    ...MOCK_CANDIDATES[2],
+    candidate_id: "demo-003",
+    role: "AI Automation Engineer",
+    score: 92,
+  },
+  {
+    ...MOCK_CANDIDATES[3],
+    candidate_id: "demo-004",
+    role: "Backend Engineer",
+  },
+];
+
 // ---------------------------------------------------------------------------
 // Mutable mock state (per server process) so the demo feels real in mock mode.
 // ---------------------------------------------------------------------------
 
 const globalForMocks = globalThis as unknown as {
-  __hrMock?: { companies: CompaniesResponse["companies"]; candidates: Candidate[] };
+  __hrMock?: {
+    companies: CompaniesResponse["companies"];
+    candidates: Candidate[];
+    showcase: Candidate[];
+  };
 };
 
 function state() {
@@ -500,9 +528,38 @@ function state() {
     globalForMocks.__hrMock = {
       companies: MOCK_COMPANIES.companies.map((c) => ({ ...c })),
       candidates: MOCK_CANDIDATES.map((c) => ({ ...c })),
+      showcase: SHOWCASE_CANDIDATES.map((c) => ({ ...c })),
     };
   }
+  if (!globalForMocks.__hrMock.showcase) {
+    globalForMocks.__hrMock.showcase = SHOWCASE_CANDIDATES.map((c) => ({ ...c }));
+  }
   return globalForMocks.__hrMock;
+}
+
+export function isShowcaseCandidateId(candidateId: string): boolean {
+  return candidateId.startsWith("demo-");
+}
+
+function summarizeCandidates(candidates: Candidate[]): CandidatesResponse {
+  const scores = candidates.map((c) => c.score).filter((s): s is number => s !== null);
+  return {
+    stats: {
+      total: candidates.length,
+      review: candidates.filter((c) => c.status === "review").length,
+      shortlisted: candidates.filter((c) => c.status === "shortlisted").length,
+      rejected: candidates.filter((c) => c.status === "rejected" || c.status === "rejected_by_hr").length,
+      interview_invited: candidates.filter((c) => c.status === "interview_invited").length,
+      avg_score: scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0,
+    },
+    candidates: [...candidates],
+  };
+}
+
+export function mergeWithShowcaseCandidates(live: CandidatesResponse): CandidatesResponse {
+  const existingIds = new Set(live.candidates.map((c) => c.candidate_id));
+  const demoRows = state().showcase.filter((c) => !existingIds.has(c.candidate_id));
+  return summarizeCandidates([...live.candidates, ...demoRows]);
 }
 
 export function mockListCompanies(): CompaniesResponse {
@@ -518,19 +575,7 @@ export function mockAddPolicies(company: string, added: number): PoliciesRespons
 }
 
 export function mockListCandidates(): CandidatesResponse {
-  const candidates = state().candidates;
-  const scores = candidates.map((c) => c.score).filter((s): s is number => s !== null);
-  return {
-    stats: {
-      total: candidates.length,
-      review: candidates.filter((c) => c.status === "review").length,
-      shortlisted: candidates.filter((c) => c.status === "shortlisted").length,
-      rejected: candidates.filter((c) => c.status === "rejected" || c.status === "rejected_by_hr").length,
-      interview_invited: candidates.filter((c) => c.status === "interview_invited").length,
-      avg_score: scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0,
-    },
-    candidates: [...candidates],
-  };
+  return summarizeCandidates(state().candidates);
 }
 
 export function mockApplyAction(
@@ -538,7 +583,10 @@ export function mockApplyAction(
   action: "invite_interview" | "reject",
   interview_at?: string
 ): ActionResponse | null {
-  const c = state().candidates.find((x) => x.candidate_id === candidate_id);
+  const s = state();
+  const c =
+    s.candidates.find((x) => x.candidate_id === candidate_id) ??
+    s.showcase.find((x) => x.candidate_id === candidate_id);
   if (!c) return null;
   c.status = action === "invite_interview" ? "interview_invited" : "rejected_by_hr";
   c.interview_at = action === "invite_interview" ? interview_at ?? null : c.interview_at;

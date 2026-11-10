@@ -67,20 +67,10 @@ export function LoginGate() {
               value={passcode}
               onChange={(e) => setPasscode(e.target.value)}
               invalid={!!error}
-              placeholder="Enter demo passcode"
+              placeholder="Enter recruiter passcode"
               autoFocus
               required
             />
-            <div className="mt-1.5 flex items-center justify-between text-xs">
-              <span className="text-muted">Demo passcode:</span>
-              <button
-                type="button"
-                onClick={() => setPasscode("demo-recruiter-2024")}
-                className="font-mono text-accent hover:underline focus:outline-none"
-              >
-                demo-recruiter-2024 (fill)
-              </button>
-            </div>
           </Field>
 
           <Button type="submit" size="lg" className="w-full" disabled={!passcode.trim() || loading}>

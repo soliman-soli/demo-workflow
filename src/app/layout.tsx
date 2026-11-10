@@ -39,7 +39,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           rel="stylesheet"
         />
       </head>
-      <body className="min-h-screen flex flex-col">
+      <body suppressHydrationWarning className="min-h-screen flex flex-col">
         <ThemeProvider>
           <ToastProvider>
             <a

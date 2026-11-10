@@ -37,9 +37,9 @@ export default function HomePage() {
           <h2 id="projects-title" className="text-3xl font-medium">
             Projects
           </h2>
-          <p className="hidden text-sm text-muted sm:block">One live demo, more on the way.</p>
+          <p className="hidden text-sm text-muted sm:block">Live interactive demo.</p>
         </div>
-        <ul className="grid gap-6 md:grid-cols-2">
+        <ul className={cn("grid gap-6", projects.length > 1 ? "md:grid-cols-2" : "max-w-2xl")}>
           {projects.map((p) => (
             <li key={p.title}>
               <ProjectCard project={p} />

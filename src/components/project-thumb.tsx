@@ -1,10 +1,12 @@
 import type { Project } from "@/site.config";
 
+export type ProjectMotif = "hr" | "dashboard" | "island" | "video";
+
 /**
  * Quiet, abstract line-art thumbnails. Pure SVG so they theme with CSS
  * variables and need no image assets.
  */
-export function ProjectThumb({ motif }: { motif: Project["motif"] }) {
+export function ProjectThumb({ motif }: { motif: Project["motif"] | ProjectMotif }) {
   const stroke = "var(--color-muted)";
   const accent = "var(--color-accent)";
   const clay = "var(--color-highlight)";

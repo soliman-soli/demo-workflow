@@ -5,7 +5,7 @@ import { ChevronDown, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Field, Honeypot, Input, Textarea } from "@/components/ui/input";
 import { PdfDropzone, createSamplePdf } from "@/components/ui/pdf-dropzone";
-import { ErrorState, Notice } from "@/components/ui/states";
+import { ErrorState } from "@/components/ui/states";
 import { TurnstileWidget } from "@/components/ui/turnstile";
 import { api } from "@/lib/hr/client";
 import { CoachResponseSchema, RolesResponseSchema, type CoachReport, type Role } from "@/lib/hr/schemas";
@@ -214,8 +214,6 @@ export function CoachFlow() {
       <PdfDropzone file={cv} onFile={setCv} error={fieldErrors.cv} />
 
       <TurnstileWidget />
-
-      <Notice>This is a demo. Don&apos;t upload sensitive documents. Your cover letter is really sent by email.</Notice>
 
       <Button type="submit" size="lg" className="w-full sm:w-auto">
         Get my report

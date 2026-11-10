@@ -3,10 +3,7 @@ import { siteConfig } from "@/site.config";
 export function Footer() {
   return (
     <footer className="no-print border-t border-border">
-      <div className="mx-auto flex max-w-[1120px] flex-col items-start justify-between gap-3 px-4 py-8 text-sm text-muted sm:flex-row sm:items-center sm:px-6">
-        <p>
-          {siteConfig.name} · {siteConfig.footerNote}
-        </p>
+      <div className="mx-auto flex max-w-[1120px] items-center justify-end gap-5 px-4 py-8 text-sm text-muted sm:px-6">
         <div className="flex gap-5">
           <a href={siteConfig.contact.github} target="_blank" rel="noopener noreferrer" className="hover:text-text">
             GitHub

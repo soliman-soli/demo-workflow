@@ -69,6 +69,17 @@ describe("HR Zod Schemas", () => {
     expect(autoRejected?.interview_questions).toHaveLength(0);
   });
 
+  it("validates CandidatesResponse when pipeline is empty and avg_score is null", () => {
+    const empty = CandidatesResponseSchema.safeParse({
+      stats: { total: 0, review: 0, shortlisted: 0, rejected: 0, interview_invited: 0, avg_score: null },
+      candidates: [],
+    });
+    expect(empty.success).toBe(true);
+    if (empty.success) {
+      expect(empty.data.stats.avg_score).toBe(0);
+    }
+  });
+
   it("validates ActionRequestSchema", () => {
     const invite = ActionRequestSchema.safeParse({
       candidate_id: "cand-001",

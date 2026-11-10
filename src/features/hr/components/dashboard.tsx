@@ -1,19 +1,16 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   ChevronLeft,
   Download,
   Loader2,
-  LogOut,
   MoreHorizontal,
   RefreshCw,
   Search,
   Users,
 } from "lucide-react";
-import { HealthPill } from "@/components/health-pill";
 import { ScoreBadge, StatusBadge, STATUS_LABEL } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
@@ -70,7 +67,6 @@ function computeStats(candidates: Candidate[]): CandidateStats {
 }
 
 export function Dashboard() {
-  const router = useRouter();
   const { toast } = useToast();
 
   const [candidates, setCandidates] = useState<Candidate[] | null>(null);
@@ -92,28 +88,21 @@ export function Dashboard() {
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [actionBusy, setActionBusy] = useState(false);
 
-  const fetchCandidates = useCallback(
-    async (silent = false) => {
-      if (!silent) setRefreshing(true);
-      setError(null);
-      const res = await api("/api/hr/candidates", CandidatesResponseSchema);
-      setRefreshing(false);
+  const fetchCandidates = useCallback(async (silent = false) => {
+    if (!silent) setRefreshing(true);
+    setError(null);
+    const res = await api("/api/hr/candidates", CandidatesResponseSchema);
+    setRefreshing(false);
 
-      if (!res.ok) {
-        if (res.status === 401) {
-          router.push("/projects/hr-system/hr");
-          return;
-        }
-        setError(res.error);
-        return;
-      }
+    if (!res.ok) {
+      setError(res.error);
+      return;
+    }
 
-      setCandidates(res.data.candidates);
-      setStats(res.data.stats);
-      setLastUpdated(new Date());
-    },
-    [router]
-  );
+    setCandidates(res.data.candidates);
+    setStats(res.data.stats);
+    setLastUpdated(new Date());
+  }, []);
 
   // Initial load + 30s auto-refresh
   useEffect(() => {
@@ -295,12 +284,6 @@ export function Dashboard() {
     URL.revokeObjectURL(url);
   }
 
-  async function handleLogout() {
-    await fetch("/api/hr/logout", { method: "POST" });
-    router.push("/projects/hr-system/hr");
-    router.refresh();
-  }
-
   return (
     <div className="space-y-8">
       {/* Top header */}
@@ -316,7 +299,6 @@ export function Dashboard() {
           <div>
             <div className="flex flex-wrap items-center gap-3">
               <h1 className="text-3xl font-medium sm:text-4xl">Recruiter dashboard</h1>
-              <HealthPill />
             </div>
             <p className="mt-1 text-xs text-muted" aria-live="polite">
               {lastUpdated
@@ -343,10 +325,6 @@ export function Dashboard() {
             >
               <Download className="h-3.5 w-3.5" aria-hidden />
               Export CSV
-            </Button>
-            <Button variant="ghost" size="sm" onClick={() => void handleLogout()}>
-              <LogOut className="h-3.5 w-3.5" aria-hidden />
-              Log out
             </Button>
           </div>
         </div>

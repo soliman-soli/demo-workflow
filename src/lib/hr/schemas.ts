@@ -230,7 +230,7 @@ export const CandidateStatsSchema = z.object({
   shortlisted: z.number(),
   rejected: z.number(),
   interview_invited: z.number(),
-  avg_score: z.number(),
+  avg_score: z.number().nullable().transform((v) => v ?? 0),
 });
 
 export const CandidatesResponseSchema = z.object({

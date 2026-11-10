@@ -1,17 +1,9 @@
-import { NextResponse, type NextRequest } from "next/server";
-import { HR_COOKIE_NAME, verifySessionToken } from "@/lib/hr/session";
-
-const GATE = "/projects/hr-system/hr";
+import { NextResponse } from "next/server";
 
 /**
- * Optimistic gate for the recruiter dashboard pages. The API routes
- * (candidates, action) verify the cookie again on their own.
+ * Pass-through proxy. Recruiter dashboard demo is open without a passcode.
  */
-export async function proxy(request: NextRequest) {
-  const valid = await verifySessionToken(request.cookies.get(HR_COOKIE_NAME)?.value);
-  if (!valid) {
-    return NextResponse.redirect(new URL(GATE, request.url));
-  }
+export async function proxy() {
   return NextResponse.next();
 }
 

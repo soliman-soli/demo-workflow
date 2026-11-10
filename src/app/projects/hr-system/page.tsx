@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, ChevronRight, LockKeyhole } from "lucide-react";
-import { HealthPill } from "@/components/health-pill";
+import { ArrowRight, ChevronRight, LayoutDashboard } from "lucide-react";
 import { Tag } from "@/components/ui/badge";
-import { Notice } from "@/components/ui/states";
 
 export const metadata: Metadata = {
   title: "HR Demo",
@@ -68,7 +66,6 @@ export default function HrSystemPage() {
         <div className="col-span-12 lg:col-span-8">
           <div className="flex flex-wrap items-center gap-3">
             <h1 className="text-4xl font-medium sm:text-5xl">HR Demo</h1>
-            <HealthPill />
           </div>
           <p className="mt-3 text-lg text-muted">AI-powered HR for candidates and recruiters</p>
           <div className="mt-5 flex flex-wrap gap-1.5">
@@ -115,16 +112,12 @@ export default function HrSystemPage() {
           href="/projects/hr-system/hr"
           className="mt-5 flex items-center gap-3 rounded-[var(--radius-card)] border border-dashed border-border px-5 py-4 text-sm text-muted transition-colors hover:border-accent/40 hover:text-text"
         >
-          <LockKeyhole className="h-4 w-4 shrink-0" aria-hidden />
+          <LayoutDashboard className="h-4 w-4 shrink-0" aria-hidden />
           <span className="flex-1">
             <span className="font-medium text-text">For the HR team:</span> recruiter dashboard, screening sheet and system health
           </span>
           <ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
         </Link>
-
-        <div className="mt-5">
-          <Notice>This is a demo. Don&apos;t upload sensitive documents. Emails are really sent.</Notice>
-        </div>
       </section>
 
       {/* Case study */}
