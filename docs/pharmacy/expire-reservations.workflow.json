@@ -1,0 +1,262 @@
+{
+  "name": "Dawaa Pharmacy - Expire Reservations (>2h)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 15
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger-15m",
+      "name": "Schedule Every 15 Minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        180,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $env.DAWAA_SHEET_ID }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Reservations",
+          "mode": "name"
+        }
+      },
+      "id": "read-reservations-expiry",
+      "name": "Read Reservations",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        400,
+        300
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "dawaa-google-sheets",
+          "name": "Dawaa Google Sheets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const now = Date.now();\nconst rows = $input.all().map(i => i.json);\nconst expired = rows.filter(r => {\n  if (r.status !== 'reserved' && r.status !== 'pending') return false;\n  if (!r.expires_at) return false;\n  const ts = new Date(r.expires_at).getTime();\n  return !Number.isNaN(ts) && ts <= now;\n});\nreturn expired.map(r => ({\n  json: {\n    request_id: r.request_id,\n    line_no: Number(r.line_no),\n    medicine_id: r.medicine_id,\n    qty: Number(r.qty),\n    prev_status: r.status,\n    status: 'expired',\n    expires_at: ''\n  }\n}));"
+      },
+      "id": "filter-expired",
+      "name": "Filter Expired (> 2h)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        620,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $env.DAWAA_SHEET_ID }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Reservations",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "matchingColumns": [
+            "request_id",
+            "line_no"
+          ],
+          "value": {
+            "request_id": "={{ $json.request_id }}",
+            "line_no": "={{ $json.line_no }}",
+            "status": "expired",
+            "expires_at": ""
+          }
+        }
+      },
+      "id": "mark-expired",
+      "name": "Mark Expired",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        840,
+        300
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "dawaa-google-sheets",
+          "name": "Dawaa Google Sheets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $env.DAWAA_SHEET_ID }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Catalog",
+          "mode": "name"
+        }
+      },
+      "id": "read-catalog-expiry",
+      "name": "Read Catalog",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1060,
+        300
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "dawaa-google-sheets",
+          "name": "Dawaa Google Sheets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const expired = $('Filter Expired (> 2h)').all().map(i => i.json);\nconst catalog = $input.all().map(i => ({ ...i.json, stock: Number(i.json.stock) }));\nconst deltas = new Map();\n\nfor (const row of expired) {\n  if (row.prev_status !== 'reserved') continue;\n  deltas.set(row.medicine_id, (deltas.get(row.medicine_id) || 0) + Number(row.qty));\n}\n\nconst updates = [];\nfor (const [id, addQty] of deltas.entries()) {\n  const cat = catalog.find(c => c.id === id);\n  if (!cat) continue;\n  updates.push({ json: { id, stock: cat.stock + addQty } });\n}\nreturn updates;"
+      },
+      "id": "restore-stock-deltas",
+      "name": "Restore Stock Deltas",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1280,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $env.DAWAA_SHEET_ID }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Catalog",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "matchingColumns": [
+            "id"
+          ],
+          "value": {
+            "id": "={{ $json.id }}",
+            "stock": "={{ $json.stock }}"
+          }
+        }
+      },
+      "id": "update-catalog-stock",
+      "name": "Update Catalog Stock",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1500,
+        300
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "dawaa-google-sheets",
+          "name": "Dawaa Google Sheets"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Every 15 Minutes": {
+      "main": [
+        [
+          {
+            "node": "Read Reservations",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Reservations": {
+      "main": [
+        [
+          {
+            "node": "Filter Expired (> 2h)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Expired (> 2h)": {
+      "main": [
+        [
+          {
+            "node": "Mark Expired",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark Expired": {
+      "main": [
+        [
+          {
+            "node": "Read Catalog",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Catalog": {
+      "main": [
+        [
+          {
+            "node": "Restore Stock Deltas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Restore Stock Deltas": {
+      "main": [
+        [
+          {
+            "node": "Update Catalog Stock",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

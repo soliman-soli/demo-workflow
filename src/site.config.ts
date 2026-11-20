@@ -95,6 +95,15 @@ export const siteConfig = {
       status: "live",
       motif: "hr",
     },
+    {
+      slug: "pharmacy-system",
+      title: "Dawaa Pharmacy",
+      description:
+        "WhatsApp pharmacy ordering: AI reads requests and prescriptions, auto-reserves safe orders, and routes the rest to a pharmacist on Telegram.",
+      tags: ["n8n", "Gemini", "Next.js", "TypeScript", "Google Sheets", "WhatsApp", "Telegram"],
+      status: "live",
+      motif: "pharmacy",
+    },
   ],
 } as const;
 

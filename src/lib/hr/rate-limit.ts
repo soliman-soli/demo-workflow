@@ -6,13 +6,17 @@ export interface RateLimitResult {
   reset: number;
 }
 
-/** Named limits used by the POST routes. */
+/** Named limits used by the POST and polling routes. */
 export const LIMITS = {
   chat: { limit: 20, windowMs: 60_000 },
   coach: { limit: 3, windowMs: 3_600_000 },
   apply: { limit: 3, windowMs: 3_600_000 },
   policies: { limit: 5, windowMs: 3_600_000 },
   login: { limit: 10, windowMs: 60_000 },
+  pharmacyMessage: { limit: 30, windowMs: 60_000 },
+  pharmacyDecision: { limit: 30, windowMs: 60_000 },
+  pharmacyState: { limit: 120, windowMs: 60_000 },
+  pharmacyReset: { limit: 10, windowMs: 60_000 },
 } as const;
 
 export type LimitKey = keyof typeof LIMITS;

@@ -1,0 +1,559 @@
+{
+  "name": "Dawaa Pharmacy - Pharmacist Decision",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "callback_query"
+        ]
+      },
+      "id": "tg-trigger",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        180,
+        220
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "dawaa-telegram-bot",
+          "name": "Dawaa Telegram Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "pharmacy/decision",
+        "authentication": "headerAuth",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "demo-decision-webhook",
+      "name": "Demo Decision Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        180,
+        420
+      ],
+      "webhookId": "pharmacy-decision",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "dawaa-webhook-header-auth",
+          "name": "Dawaa Webhook Header Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $input.first().json.body || $input.first().json;\nconst cbq = raw.callback_query || raw;\nconst data = String(cbq.data || '');\nconst match = data.match(/^ph:(approve|reject):(R-\\d{6}-[A-Z0-9]{4})$/);\nif (!match) {\n  throw new Error('Invalid callback_data format');\n}\nreturn [{\n  json: {\n    callback_query_id: cbq.id || null,\n    chat_id: cbq.message?.chat?.id || null,\n    message_id: cbq.message?.message_id || null,\n    pharmacist: cbq.from?.username || 'pharmacist_hala',\n    action: match[1],\n    request_id: match[2],\n    reason: raw.reason || ''\n  }\n}];"
+      },
+      "id": "parse-decision",
+      "name": "Parse Decision",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        420,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $env.DAWAA_SHEET_ID }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Reservations",
+          "mode": "name"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "request_id",
+              "lookupValue": "={{ $json.request_id }}"
+            }
+          ]
+        }
+      },
+      "id": "find-pending-lines",
+      "name": "Find Pending Lines",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        640,
+        320
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "dawaa-google-sheets",
+          "name": "Dawaa Google Sheets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $env.DAWAA_SHEET_ID }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Catalog",
+          "mode": "name"
+        }
+      },
+      "id": "read-catalog-decision",
+      "name": "Read Catalog (Decision)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        860,
+        320
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "dawaa-google-sheets",
+          "name": "Dawaa Google Sheets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const parsed = $('Parse Decision').first().json;\nconst lines = $('Find Pending Lines').all().map(i => i.json).filter(l => l.status === 'pending');\nconst catalog = $input.all().map(i => ({ ...i.json, stock: Number(i.json.stock), price_egp: Number(i.json.price_egp) }));\n\nif (!lines.length) {\n  return [{ json: { ...parsed, decision_ok: false, toast: `No pending request found for ${parsed.request_id}.`, lines: [], catalog } }];\n}\n\nif (parsed.action === 'approve') {\n  for (const line of lines) {\n    const cat = catalog.find(c => c.id === line.medicine_id);\n    if (!cat || cat.stock < Number(line.qty)) {\n      const name = cat ? `${cat.name} ${cat.strength}` : line.medicine_id;\n      return [{ json: { ...parsed, decision_ok: false, toast: `Not enough stock for ${name}. Edit the request or reject.`, lines, catalog } }];\n    }\n  }\n}\n\nconst toast = parsed.action === 'approve'\n  ? `Approved ${parsed.request_id} by ${parsed.pharmacist}`\n  : `Rejected ${parsed.request_id}`;\n\nreturn [{ json: { ...parsed, decision_ok: true, toast, lines, catalog } }];"
+      },
+      "id": "apply-decision",
+      "name": "Apply Decision",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1080,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "callback",
+        "queryId": "={{ $json.callback_query_id }}",
+        "additionalFields": {
+          "text": "={{ $json.toast }}",
+          "show_alert": "={{ !$json.decision_ok }}"
+        }
+      },
+      "id": "answer-pharmacist",
+      "name": "Answer Pharmacist",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1300,
+        320
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "dawaa-telegram-bot",
+          "name": "Dawaa Telegram Bot"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $('Apply Decision').first().json.decision_ok }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "decision-ok-if",
+      "name": "Decision OK?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1520,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const d = $('Apply Decision').first().json;\nconst nextStatus = d.action === 'approve' ? 'reserved' : 'rejected';\nconst expiresAt = d.action === 'approve' ? new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString() : '';\nreturn d.lines.map(l => ({\n  json: {\n    request_id: l.request_id,\n    line_no: l.line_no,\n    status: nextStatus,\n    expires_at: expiresAt\n  }\n}));"
+      },
+      "id": "line-updates",
+      "name": "Line Updates",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1760,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $env.DAWAA_SHEET_ID }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Reservations",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "matchingColumns": [
+            "request_id",
+            "line_no"
+          ],
+          "value": {
+            "request_id": "={{ $json.request_id }}",
+            "line_no": "={{ $json.line_no }}",
+            "status": "={{ $json.status }}",
+            "expires_at": "={{ $json.expires_at }}"
+          }
+        }
+      },
+      "id": "update-lines",
+      "name": "Update Lines",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1980,
+        240
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "dawaa-google-sheets",
+          "name": "Dawaa Google Sheets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "editMessageText",
+        "chatId": "={{ $('Apply Decision').first().json.chat_id }}",
+        "messageId": "={{ $('Apply Decision').first().json.message_id }}",
+        "text": "={{ $('Apply Decision').first().json.action === 'approve' ? `Request ${$('Apply Decision').first().json.request_id} — Approved by ${$('Apply Decision').first().json.pharmacist}` : `Request ${$('Apply Decision').first().json.request_id} — Rejected` }}"
+      },
+      "id": "mark-message-done",
+      "name": "Mark Message Done",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2200,
+        240
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "dawaa-telegram-bot",
+          "name": "Dawaa Telegram Bot"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $('Apply Decision').first().json.action }}",
+              "value2": "approve"
+            }
+          ]
+        }
+      },
+      "id": "approved-if",
+      "name": "Approved?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        2420,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const d = $('Apply Decision').first().json;\nreturn d.lines.map(l => {\n  const cat = d.catalog.find(c => c.id === l.medicine_id);\n  return {\n    json: {\n      id: l.medicine_id,\n      stock: Math.max(0, Number(cat.stock) - Number(l.qty))\n    }\n  };\n});"
+      },
+      "id": "stock-rows",
+      "name": "Stock Rows",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2660,
+        140
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $env.DAWAA_SHEET_ID }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Catalog",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "matchingColumns": [
+            "id"
+          ],
+          "value": {
+            "id": "={{ $json.id }}",
+            "stock": "={{ $json.stock }}"
+          }
+        }
+      },
+      "id": "take-stock-approved",
+      "name": "Take Stock (Approved)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        2880,
+        140
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "dawaa-google-sheets",
+          "name": "Dawaa Google Sheets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "={{ $env.WHATSAPP_PHONE_NUMBER_ID }}",
+        "recipientPhoneNumber": "201000000000",
+        "textBody": "={{ $('Apply Decision').first().json.action === 'approve' ? `Approved by pharmacist! Reserved for 2 hours (${$('Apply Decision').first().json.request_id}). Pick up from the pharmacy.` : `Update on ${$('Apply Decision').first().json.request_id}: the pharmacist could not approve this request.` }}"
+      },
+      "id": "tell-customer",
+      "name": "Tell Customer",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [
+        3100,
+        240
+      ],
+      "credentials": {
+        "whatsAppApi": {
+          "id": "dawaa-whatsapp-api",
+          "name": "Dawaa WhatsApp API"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { ok: true, decision_ok: $('Apply Decision').first().json.decision_ok, toast: $('Apply Decision').first().json.toast } }}"
+      },
+      "id": "respond-decision",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        3320,
+        320
+      ]
+    }
+  ],
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Parse Decision",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Demo Decision Webhook": {
+      "main": [
+        [
+          {
+            "node": "Parse Decision",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Decision": {
+      "main": [
+        [
+          {
+            "node": "Find Pending Lines",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Pending Lines": {
+      "main": [
+        [
+          {
+            "node": "Read Catalog (Decision)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Catalog (Decision)": {
+      "main": [
+        [
+          {
+            "node": "Apply Decision",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Apply Decision": {
+      "main": [
+        [
+          {
+            "node": "Answer Pharmacist",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Answer Pharmacist": {
+      "main": [
+        [
+          {
+            "node": "Decision OK?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Decision OK?": {
+      "main": [
+        [
+          {
+            "node": "Line Updates",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Line Updates": {
+      "main": [
+        [
+          {
+            "node": "Update Lines",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Lines": {
+      "main": [
+        [
+          {
+            "node": "Mark Message Done",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark Message Done": {
+      "main": [
+        [
+          {
+            "node": "Approved?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Approved?": {
+      "main": [
+        [
+          {
+            "node": "Stock Rows",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Tell Customer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Stock Rows": {
+      "main": [
+        [
+          {
+            "node": "Take Stock (Approved)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Take Stock (Approved)": {
+      "main": [
+        [
+          {
+            "node": "Tell Customer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tell Customer": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

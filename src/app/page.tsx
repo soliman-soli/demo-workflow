@@ -37,7 +37,7 @@ export default function HomePage() {
           <h2 id="projects-title" className="text-3xl font-medium">
             Projects
           </h2>
-          <p className="hidden text-sm text-muted sm:block">Live interactive demo.</p>
+          <p className="hidden text-sm text-muted sm:block">Live interactive demos.</p>
         </div>
         <ul className={cn("grid gap-6", projects.length > 1 ? "md:grid-cols-2" : "max-w-2xl")}>
           {projects.map((p) => (

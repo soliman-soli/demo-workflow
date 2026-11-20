@@ -1,0 +1,660 @@
+{
+  "name": "Dawaa Pharmacy - Customer Message",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "messages"
+        ]
+      },
+      "id": "wa-trigger-1",
+      "name": "WhatsApp Trigger",
+      "type": "n8n-nodes-base.whatsAppTrigger",
+      "typeVersion": 1,
+      "position": [
+        180,
+        220
+      ],
+      "credentials": {
+        "whatsAppTriggerApi": {
+          "id": "dawaa-whatsapp-trigger",
+          "name": "Dawaa WhatsApp Trigger"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "pharmacy/message",
+        "authentication": "headerAuth",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "demo-webhook-msg",
+      "name": "Demo Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        180,
+        420
+      ],
+      "webhookId": "pharmacy-message",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "dawaa-webhook-header-auth",
+          "name": "Dawaa Webhook Header Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst body = input.body?.payload ? JSON.parse(input.body.payload) : (input.body || input);\nconst change = body.entry?.[0]?.changes?.[0]?.value || {};\nconst contact = change.contacts?.[0] || {};\nconst msg = change.messages?.[0] || {};\nconst type = msg.type || (msg.image ? 'image' : 'text');\nconst text = type === 'image' ? (msg.image?.caption || '') : (msg.text?.body || '');\nconst now = new Date();\nconst yy = String(now.getUTCFullYear()).slice(-2);\nconst mm = String(now.getUTCMonth() + 1).padStart(2, '0');\nconst dd = String(now.getUTCDate()).padStart(2, '0');\nconst suffix = Math.random().toString(36).slice(2, 6).toUpperCase();\nreturn [{\n  json: {\n    from: msg.from || contact.wa_id || '201000000000',\n    customer: contact.profile?.name || 'Youssef Adel (Demo)',\n    type,\n    is_photo: type === 'image',\n    text,\n    image_name: msg.image?.filename || null,\n    proposed_request_id: `R-${yy}${mm}${dd}-${suffix}`,\n    timestamp: now.toISOString()\n  },\n  binary: $input.first().binary || {}\n}];"
+      },
+      "id": "normalize-msg",
+      "name": "Normalize Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        420,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.is_photo }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "is-photo-if",
+      "name": "Is Photo?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        640,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first().json;\nreturn [{\n  json: {\n    ...item,\n    prompt: `Extract pharmacy request from WhatsApp prescription photo caption: \"${item.text || ''}\" (${item.image_name || 'prescription.png'}). Return ONLY strict JSON: {\"is_prescription\": true, \"medicines\": [\"<Name> <Strength> x<Qty>\"]}. Never add markdown.`\n  },\n  binary: $input.first().binary || {}\n}];"
+      },
+      "id": "prep-image-read",
+      "name": "Prepare Image Read",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        880,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first().json;\nreturn [{\n  json: {\n    ...item,\n    prompt: `Extract requested medicines from customer WhatsApp message: \"${item.text}\". Understand English, typos, and Egyptian Arabic (including Arabic numerals). Return ONLY strict JSON: {\"is_prescription\": boolean, \"medicines\": string[]}.`\n  }\n}];"
+      },
+      "id": "prep-text-read",
+      "name": "Prepare Text Read",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        880,
+        440
+      ]
+    },
+    {
+      "parameters": {
+        "modelId": "models/gemini-2.5-flash",
+        "text": "={{ $json.prompt }}",
+        "jsonOutput": true,
+        "options": {
+          "temperature": 0.1
+        }
+      },
+      "id": "ai-read-request",
+      "name": "AI Read Request",
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        320
+      ],
+      "credentials": {
+        "googlePalmApi": {
+          "id": "dawaa-gemini-api",
+          "name": "Dawaa Gemini API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $env.DAWAA_SHEET_ID }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Catalog",
+          "mode": "name"
+        }
+      },
+      "id": "read-catalog",
+      "name": "Read Catalog",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1340,
+        320
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "dawaa-google-sheets",
+          "name": "Dawaa Google Sheets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const norm = $('Normalize Message').first().json;\nconst aiRaw = $('AI Read Request').first().json;\nconst aiParsed = typeof aiRaw.text === 'string' ? JSON.parse(aiRaw.text) : (aiRaw.output || aiRaw);\nconst catalog = $input.all().map(i => ({\n  ...i.json,\n  price_egp: Number(i.json.price_egp),\n  stock: Number(i.json.stock),\n  requires_rx: String(i.json.requires_rx).toLowerCase() === 'true'\n}));\n\nconst requested = Array.isArray(aiParsed.medicines) ? aiParsed.medicines : [];\nconst matched = [];\n\nfor (const entry of requested) {\n  const lower = String(entry).toLowerCase();\n  const found = catalog\n    .slice()\n    .sort((a, b) => b.name.length - a.name.length)\n    .find(c => lower.includes(c.name.toLowerCase()));\n  if (!found) continue;\n  const qtyMatch = lower.match(/x(\\d+)|(\\d+)x/);\n  const qty = qtyMatch ? Number(qtyMatch[1] || qtyMatch[2]) : 1;\n  const alt = found.alternative_id ? catalog.find(c => c.id === found.alternative_id) || null : null;\n  matched.push({\n    medicine: found,\n    qty,\n    in_stock: found.stock >= qty,\n    alternative: alt\n  });\n}\n\nconst needsPharmacist = Boolean(norm.is_photo || aiParsed.is_prescription || matched.some(m => m.medicine.requires_rx));\nreturn [{\n  json: {\n    request_id: matched.length ? norm.proposed_request_id : null,\n    customer: norm.customer,\n    from: norm.from,\n    is_prescription: Boolean(norm.is_photo || aiParsed.is_prescription || matched.some(m => m.medicine.requires_rx)),\n    needs_pharmacist: needsPharmacist,\n    matched,\n    catalog\n  }\n}];"
+      },
+      "id": "match-catalog",
+      "name": "Match Catalog",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1560,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\nconst now = new Date();\nconst expires = new Date(now.getTime() + 2 * 60 * 60 * 1000).toISOString();\nconst hasMatches = data.matched.length > 0;\nconst allNonRxInStock = !data.needs_pharmacist && data.matched.every(m => m.in_stock);\nconst mode = !hasMatches ? 'empty_or_unmatched' : data.needs_pharmacist ? 'pharmacist' : allNonRxInStock ? 'auto_reserve' : 'unavailable';\nreturn [{ json: { ...data, route_mode: mode, created_at: now.toISOString(), expires_at: expires } }];"
+      },
+      "id": "route-request",
+      "name": "Route Request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1780,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const r = $input.first().json;\nconst status = r.route_mode === 'auto_reserve' ? 'reserved' : 'pending';\nreturn r.matched.map((m, idx) => ({\n  json: {\n    request_id: r.request_id,\n    line_no: idx + 1,\n    customer: r.customer,\n    medicine_id: m.medicine.id,\n    qty: m.qty,\n    status,\n    created_at: r.created_at,\n    expires_at: r.expires_at,\n    route_mode: r.route_mode,\n    medicine: m.medicine,\n    alternative: m.alternative\n  }\n}));"
+      },
+      "id": "one-row-per-med",
+      "name": "One Row per Medicine",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2000,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $env.DAWAA_SHEET_ID }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Reservations",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "request_id": "={{ $json.request_id }}",
+            "line_no": "={{ $json.line_no }}",
+            "customer": "={{ $json.customer }}",
+            "medicine_id": "={{ $json.medicine_id }}",
+            "qty": "={{ $json.qty }}",
+            "status": "={{ $json.status }}",
+            "created_at": "={{ $json.created_at }}",
+            "expires_at": "={{ $json.expires_at }}"
+          }
+        }
+      },
+      "id": "save-reservation-lines",
+      "name": "Save Reservation Lines",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        2220,
+        320
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "dawaa-google-sheets",
+          "name": "Dawaa Google Sheets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $('Route Request').first().json.route_mode }}",
+              "value2": "auto_reserve"
+            }
+          ]
+        }
+      },
+      "id": "auto-or-pharmacist",
+      "name": "Auto or Pharmacist?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        2440,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const route = $('Route Request').first().json;\nreturn route.matched.map(m => ({\n  json: {\n    id: m.medicine.id,\n    stock: Math.max(0, m.medicine.stock - m.qty)\n  }\n}));"
+      },
+      "id": "take-stock-now",
+      "name": "Take Stock Now",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2680,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $env.DAWAA_SHEET_ID }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Catalog",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "matchingColumns": [
+            "id"
+          ],
+          "value": {
+            "id": "={{ $json.id }}",
+            "stock": "={{ $json.stock }}"
+          }
+        }
+      },
+      "id": "update-stock",
+      "name": "Update Stock",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        2900,
+        200
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "dawaa-google-sheets",
+          "name": "Dawaa Google Sheets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $env.TELEGRAM_PHARMACISTS_CHAT_ID }}",
+        "text": "={{ `Request ${$('Route Request').first().json.request_id}\\nCustomer: ${$('Route Request').first().json.customer}\\n` + $('Route Request').first().json.matched.map(m => `• ${m.qty} x ${m.medicine.name} ${m.medicine.strength} (${m.in_stock ? 'in stock' : 'OUT OF STOCK' + (m.alternative ? ' · Alt: ' + m.alternative.name + ' ' + m.alternative.id + ' ' + m.alternative.price_egp + ' EGP' : '')})`).join('\\n') }}",
+        "replyMarkup": "inlineKeyboard",
+        "inlineKeyboard": {
+          "rows": [
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "Approve",
+                    "additionalFields": {
+                      "callback_data": "={{ `ph:approve:${$('Route Request').first().json.request_id}` }}"
+                    }
+                  },
+                  {
+                    "text": "Reject",
+                    "additionalFields": {
+                      "callback_data": "={{ `ph:reject:${$('Route Request').first().json.request_id}` }}"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "id": "post-telegram-card",
+      "name": "Post Telegram Card",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2680,
+        440
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "dawaa-telegram-bot",
+          "name": "Dawaa Telegram Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "={{ $env.WHATSAPP_PHONE_NUMBER_ID }}",
+        "recipientPhoneNumber": "={{ $('Route Request').first().json.from }}",
+        "textBody": "={{ $('Route Request').first().json.route_mode === 'auto_reserve' ? `Reserved for 2 hours (${$('Route Request').first().json.request_id}): ` + $('Route Request').first().json.matched.map(m => `${m.qty} x ${m.medicine.name} ${m.medicine.strength} = ${m.qty * m.medicine.price_egp} EGP`).join(', ') + '. Pick up from the pharmacy.' : 'Our pharmacist is reviewing your request and will confirm shortly.\\nيقوم الصيدلي بمراجعة طلبك الآن وسيتم تأكيده خلال لحظات.' }}"
+      },
+      "id": "reply-whatsapp",
+      "name": "Reply WhatsApp",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [
+        3120,
+        320
+      ],
+      "credentials": {
+        "whatsAppApi": {
+          "id": "dawaa-whatsapp-api",
+          "name": "Dawaa WhatsApp API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { ok: true, request_id: $('Route Request').first().json.request_id } }}"
+      },
+      "id": "respond-msg",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        3340,
+        320
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "error-trigger-msg",
+      "name": "Error Trigger",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        180,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $env.DAWAA_SHEET_ID }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Errors",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "timestamp": "={{ new Date().toISOString() }}",
+            "workflow": "customer-message",
+            "message": "={{ $json.execution?.error?.message || 'Unexpected workflow error' }}"
+          }
+        }
+      },
+      "id": "log-error-sheet",
+      "name": "Log Error",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        420,
+        640
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "dawaa-google-sheets",
+          "name": "Dawaa Google Sheets"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "WhatsApp Trigger": {
+      "main": [
+        [
+          {
+            "node": "Normalize Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Demo Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Normalize Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Message": {
+      "main": [
+        [
+          {
+            "node": "Is Photo?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Photo?": {
+      "main": [
+        [
+          {
+            "node": "Prepare Image Read",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare Text Read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Image Read": {
+      "main": [
+        [
+          {
+            "node": "AI Read Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Text Read": {
+      "main": [
+        [
+          {
+            "node": "AI Read Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Read Request": {
+      "main": [
+        [
+          {
+            "node": "Read Catalog",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Catalog": {
+      "main": [
+        [
+          {
+            "node": "Match Catalog",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Match Catalog": {
+      "main": [
+        [
+          {
+            "node": "Route Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route Request": {
+      "main": [
+        [
+          {
+            "node": "One Row per Medicine",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "One Row per Medicine": {
+      "main": [
+        [
+          {
+            "node": "Save Reservation Lines",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Reservation Lines": {
+      "main": [
+        [
+          {
+            "node": "Auto or Pharmacist?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Auto or Pharmacist?": {
+      "main": [
+        [
+          {
+            "node": "Take Stock Now",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Post Telegram Card",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Take Stock Now": {
+      "main": [
+        [
+          {
+            "node": "Update Stock",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Stock": {
+      "main": [
+        [
+          {
+            "node": "Reply WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post Telegram Card": {
+      "main": [
+        [
+          {
+            "node": "Reply WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reply WhatsApp": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Log Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

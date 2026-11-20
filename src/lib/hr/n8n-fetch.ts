@@ -18,26 +18,39 @@ interface N8nFetchOptions<T> {
   timeoutMs?: number;
   /** Treat these non-2xx statuses as parseable payloads (e.g. 400 from /hr/apply). */
   acceptStatuses?: number[];
+  /** Optional base URL override (e.g. N8N_PHARMACY_BASE_URL). */
+  baseUrl?: string;
+  /** Optional secret key override (e.g. N8N_SECRET). */
+  secretKey?: string;
+  /** Optional secret header name override (defaults to X-API-KEY). */
+  secretHeader?: string;
 }
 
 /**
- * Server-only fetch to n8n. Adds X-API-KEY, enforces a timeout and never
- * surfaces upstream URLs, bodies or stack traces to the caller.
+ * Server-only fetch to n8n. Adds the webhook secret header, enforces a timeout
+ * and never surfaces upstream URLs, bodies or stack traces to the caller.
  */
 export async function n8nFetch<T = unknown>(
   path: string,
   options: N8nFetchOptions<T> = {}
 ): Promise<N8nResult<T>> {
-  const base = process.env.N8N_BASE_URL;
-  const key = process.env.N8N_WEBHOOK_KEY;
+  const base = options.baseUrl ?? process.env.N8N_BASE_URL;
+  const key = options.secretKey ?? process.env.N8N_WEBHOOK_KEY;
   if (!base || !key) {
-    console.error("[n8nFetch] N8N_BASE_URL or N8N_WEBHOOK_KEY is not configured");
+    console.error("[n8nFetch] N8N base URL or webhook key is not configured");
     return { ok: false, error: "Service is not configured", status: 503 };
   }
 
-  const { method = "GET", body, schema, timeoutMs = N8N_TIMEOUT_MS, acceptStatuses = [] } = options;
+  const {
+    method = "GET",
+    body,
+    schema,
+    timeoutMs = N8N_TIMEOUT_MS,
+    acceptStatuses = [],
+    secretHeader = "X-API-KEY",
+  } = options;
   const isForm = typeof FormData !== "undefined" && body instanceof FormData;
-  const headers: Record<string, string> = { "X-API-KEY": key, Accept: "application/json" };
+  const headers: Record<string, string> = { [secretHeader]: key, Accept: "application/json" };
   if (body !== undefined && !isForm) headers["Content-Type"] = "application/json";
 
   const controller = new AbortController();

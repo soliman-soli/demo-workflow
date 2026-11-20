@@ -1,0 +1,9 @@
+id,name,strength,price_egp,stock,requires_rx,alternative_id
+P101,Panadol,500mg,45,18,false,P102
+P102,Panadol Extra,500mg/65mg,58,12,false,P101
+B103,Brufen,400mg,62,10,false,C105
+N104,Antinal,200mg,54,15,false,
+C105,Cataflam,50mg,72,0,false,B103
+A201,Augmentin,1g,118,0,true,A202
+A202,Hibiotic,1g,96,9,true,A201
+M203,Concor,5mg,84,7,true,

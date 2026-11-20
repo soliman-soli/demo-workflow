@@ -1,6 +1,6 @@
 import type { Project } from "@/site.config";
 
-export type ProjectMotif = "hr" | "dashboard" | "island" | "video";
+export type ProjectMotif = "hr" | "pharmacy" | "dashboard" | "island" | "video";
 
 /**
  * Quiet, abstract line-art thumbnails. Pure SVG so they theme with CSS
@@ -26,6 +26,26 @@ export function ProjectThumb({ motif }: { motif: Project["motif"] | ProjectMotif
           <circle cx="330" cy="58" r="6" fill={clay} stroke="none" opacity="0.8" />
           <circle cx="330" cy="122" r="6" fill={stroke} stroke="none" opacity="0.35" />
           <path d="M292 82 L322 60 M292 98 L322 120" stroke={stroke} opacity="0.4" />
+        </g>
+      )}
+      {motif === "pharmacy" && (
+        <g fill="none" strokeWidth="1.5">
+          {/* WhatsApp-style request card */}
+          <rect x="52" y="42" width="112" height="96" rx="10" stroke={stroke} opacity="0.5" />
+          <path d="M108 62 v24 M96 74 h24" stroke={accent} strokeWidth="2" />
+          <line x1="72" y1="104" x2="144" y2="104" stroke={stroke} opacity="0.4" />
+          <line x1="84" y1="118" x2="132" y2="118" stroke={stroke} opacity="0.3" />
+          {/* Routing split */}
+          <path d="M164 90 H208" stroke={accent} strokeDasharray="4 4" />
+          <circle cx="222" cy="90" r="14" stroke={accent} />
+          <path d="M236 82 L286 58 M236 98 L286 122" stroke={stroke} opacity="0.45" />
+          {/* Auto-reserve node */}
+          <rect x="286" y="40" width="64" height="36" rx="8" stroke={accent} />
+          <path d="M308 58 l6 6 l12 -12" stroke={accent} strokeWidth="2" />
+          {/* Pharmacist Telegram review node */}
+          <rect x="286" y="104" width="64" height="36" rx="8" stroke={clay} opacity="0.85" />
+          <circle cx="304" cy="122" r="5" fill={clay} stroke="none" opacity="0.85" />
+          <line x1="316" y1="122" x2="338" y2="122" stroke={stroke} opacity="0.55" />
         </g>
       )}
       {motif === "dashboard" && (

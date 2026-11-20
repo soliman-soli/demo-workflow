@@ -9,4 +9,8 @@
 - [x] Build Ask HR (`src/features/ask/*`), Career Coach (`src/features/coach/*`), Apply (`src/features/apply/*`), and Recruiter Dashboard (`src/features/hr/*`)
 - [x] Write Vitest unit tests and Playwright E2E smoke tests
 - [x] Author `supabase/schema.sql` and `DATABASE_AND_INTEGRATION_GUIDE.md`
+- [x] Add Dawaa Pharmacy schemas, image validator (JPEG/PNG/WebP <= 5 MB), and n8n workflow simulator engine (`src/lib/pharmacy/*`)
+- [x] Add `/api/pharmacy/*` routes (`message`, `decision`, `state`, `reset`) reusing `n8nFetch` and `checkRateLimit`
+- [x] Build Dawaa Pharmacy 3-column simulator, Google Sheet viewer, case study, and home card (`/projects/pharmacy-system`)
+- [x] Author n8n deliverables in `docs/pharmacy/` (`customer-message.workflow.json`, `pharmacist-decision.workflow.json`, `expire-reservations.workflow.json`, `google-sheet-schema.md`, `catalog-seed.csv`, `README.md`)
 
