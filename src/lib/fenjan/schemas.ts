@@ -45,6 +45,7 @@ export const FenjanChatResponseSchema = z.object({
   open: z.boolean().optional(),
   openHour: z.union([z.number(), z.string()]).nullable().optional(),
   cart: FenjanCartSchema.nullable().optional(),
+  staffAlert: z.string().nullable().optional(),
 });
 
 // ---------------------------------------------------------------------------

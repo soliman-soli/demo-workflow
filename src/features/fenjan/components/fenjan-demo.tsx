@@ -34,6 +34,7 @@ const QUICK_CHIPS = [
   "Show the menu",
   "2 Spanish Latte, delivery",
   "عايز قهوة",
+  "I need a human",
 ] as const;
 
 const KITCHEN_FORM_URL =
@@ -42,6 +43,12 @@ const KITCHEN_FORM_URL =
 interface ChatItem {
   id: string;
   role: "user" | "bot" | "status";
+  text: string;
+  timestamp: string;
+}
+
+interface StaffAlertItem {
+  id: string;
   text: string;
   timestamp: string;
 }
@@ -150,7 +157,8 @@ export function FenjanDemo() {
   const [sending, setSending] = useState(false);
   const [chatError, setChatError] = useState<string | null>(null);
   const [notConnected, setNotConnected] = useState(false);
-  const [mobileTab, setMobileTab] = useState<"chat" | "side">("chat");
+  const [mobileTab, setMobileTab] = useState<"chat" | "kitchen" | "side">("chat");
+  const [staffAlerts, setStaffAlerts] = useState<StaffAlertItem[]>([]);
 
   // Latest workflow metadata driven strictly by n8n responses
   const [cart, setCart] = useState<FenjanCart | null>(null);
@@ -179,6 +187,7 @@ export function FenjanDemo() {
   const [specialError, setSpecialError] = useState<string | null>(null);
 
   const listRef = useRef<HTMLDivElement>(null);
+  const alertsListRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const lastAnnouncedStatusRef = useRef<string | null>(null);
 
@@ -251,6 +260,14 @@ export function FenjanDemo() {
       el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
     }
   }, [messages.length, sending, chatError]);
+
+  // Scroll kitchen alerts panel to newest alert
+  useEffect(() => {
+    const el = alertsListRef.current;
+    if (el) {
+      el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+    }
+  }, [staffAlerts.length]);
 
   const pollOrderStatus = useCallback(
     async (orderId: string, chatLanguage: string | null) => {
@@ -375,6 +392,18 @@ export function FenjanDemo() {
       setCart(data.cart ?? null);
     }
 
+    if (typeof data.staffAlert === "string" && data.staffAlert.trim().length > 0) {
+      const alertText = data.staffAlert;
+      setStaffAlerts((prev) => [
+        ...prev,
+        {
+          id: uid("alert"),
+          text: alertText,
+          timestamp: new Date().toISOString(),
+        },
+      ]);
+    }
+
     if (data.intent !== undefined || data.language !== undefined) {
       setUnderstood({
         intent: data.intent ?? null,
@@ -416,6 +445,7 @@ export function FenjanDemo() {
     }
     setSessionId(freshId);
     setMessages([]);
+    setStaffAlerts([]);
     setInput("");
     setChatError(null);
     setCart(null);
@@ -509,7 +539,7 @@ export function FenjanDemo() {
         <div
           role="tablist"
           aria-label="Fenjan demo views"
-          className="grid grid-cols-2 gap-1 rounded-[var(--radius-btn)] border border-border bg-surface-2 p-1"
+          className="grid grid-cols-3 gap-1 rounded-[var(--radius-btn)] border border-border bg-surface-2 p-1"
         >
           <button
             type="button"
@@ -517,7 +547,7 @@ export function FenjanDemo() {
             aria-selected={mobileTab === "chat"}
             onClick={() => setMobileTab("chat")}
             className={cn(
-              "rounded-[8px] px-3 py-2 text-xs font-medium transition-colors",
+              "rounded-[8px] px-2.5 py-2 text-xs font-medium transition-colors",
               mobileTab === "chat"
                 ? "bg-surface text-text shadow-sm"
                 : "text-muted hover:text-text"
@@ -528,10 +558,24 @@ export function FenjanDemo() {
           <button
             type="button"
             role="tab"
+            aria-selected={mobileTab === "kitchen"}
+            onClick={() => setMobileTab("kitchen")}
+            className={cn(
+              "rounded-[8px] px-2.5 py-2 text-xs font-medium transition-colors",
+              mobileTab === "kitchen"
+                ? "bg-surface text-text shadow-sm"
+                : "text-muted hover:text-text"
+            )}
+          >
+            Kitchen{staffAlerts.length > 0 ? ` (${staffAlerts.length})` : ""}
+          </button>
+          <button
+            type="button"
+            role="tab"
             aria-selected={mobileTab === "side"}
             onClick={() => setMobileTab("side")}
             className={cn(
-              "rounded-[8px] px-3 py-2 text-xs font-medium transition-colors",
+              "rounded-[8px] px-2.5 py-2 text-xs font-medium transition-colors",
               mobileTab === "side"
                 ? "bg-surface text-text shadow-sm"
                 : "text-muted hover:text-text"
@@ -724,13 +768,78 @@ export function FenjanDemo() {
           </div>
         </section>
 
-        {/* Right Column: Live Cart + Order Tracker + Daily Special */}
-        <div
+        {/* Right: Fenjan Kitchen · Telegram (read-only staff alert feed) */}
+        <section
+          aria-label="Fenjan Kitchen Telegram alerts"
           className={cn(
-            "flex flex-col gap-5 lg:col-span-5",
-            mobileTab !== "side" && "hidden lg:flex"
+            "flex h-[540px] flex-col overflow-hidden rounded-[var(--radius-card)] border border-border bg-surface lg:col-span-5",
+            mobileTab !== "kitchen" && "hidden lg:flex"
           )}
         >
+          <div className="border-b border-border px-4 py-3">
+            <div className="flex items-center justify-between gap-2">
+              <h3 className="font-sans text-sm font-semibold text-text">
+                Fenjan Kitchen · Telegram
+              </h3>
+              <Badge tone="neutral">staff</Badge>
+            </div>
+            <p className="mt-1 text-xs leading-relaxed text-muted">
+              New orders and &quot;call a human&quot; alerts arrive here. This is the message the kitchen gets in Telegram.
+            </p>
+          </div>
+
+          <div
+            ref={alertsListRef}
+            role="log"
+            aria-live="polite"
+            aria-label="Telegram alert messages"
+            className="flex-1 overflow-y-auto px-4 py-4"
+          >
+            {staffAlerts.length === 0 ? (
+              <div className="flex h-full items-center justify-center px-4 text-center">
+                <p className="text-sm text-muted">
+                  No alerts yet. Try ordering something, or write &quot;I need a human&quot;.
+                </p>
+              </div>
+            ) : (
+              <ol className="space-y-3">
+                {staffAlerts.map((alert) => (
+                  <li key={alert.id}>
+                    <div className="rounded-2xl rounded-bl-md border border-border bg-surface-2/70 px-4 py-3">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-xs font-semibold text-accent">
+                          Fenjan Bot
+                        </span>
+                        <time
+                          dateTime={alert.timestamp}
+                          className="text-[11px] text-muted"
+                        >
+                          {formatTime(alert.timestamp)}
+                        </time>
+                      </div>
+                      <p
+                        dir="auto"
+                        className="mt-1.5 text-left text-sm leading-relaxed text-text whitespace-pre-wrap"
+                      >
+                        {alert.text}
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            )}
+          </div>
+        </section>
+      </div>
+
+      {/* Lower Row: Live Cart + Order Tracker + Daily Special */}
+      <div
+        className={cn(
+          "grid gap-5 lg:grid-cols-12",
+          mobileTab !== "side" && "hidden lg:grid"
+        )}
+      >
+        <div className="flex flex-col gap-5 lg:col-span-7">
           {/* Live Cart Panel */}
           <section
             aria-label="Live cart"
@@ -872,7 +981,9 @@ export function FenjanDemo() {
               )}
             </section>
           )}
+        </div>
 
+        <div className="lg:col-span-5">
           {/* Daily Special Card */}
           <section
             aria-label="Daily special"

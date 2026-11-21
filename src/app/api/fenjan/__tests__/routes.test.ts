@@ -154,6 +154,50 @@ describe("Fenjan Café API Route Handlers", () => {
 
       const returned = await res.json();
       expect(returned).toEqual(n8nPayload);
+      expect("staffAlert" in returned).toBe(false);
+    });
+
+    it("passes staffAlert through unchanged when present and leaves it empty when empty", async () => {
+      const multilineAlert =
+        "New order F-261121-K7Q2\n2 x Spanish Latte\nDelivery: Maadi\nTotal: 215 EGP";
+
+      vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            reply: "Order confirmed",
+            sessionId: "fenjan-abc123",
+            orderId: "F-261121-K7Q2",
+            staffAlert: multilineAlert,
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } }
+        )
+      );
+
+      const withAlertRes = await chatPost(
+        makeChatReq({ sessionId: "fenjan-abc123", message: "confirm" })
+      );
+      expect(withAlertRes.status).toBe(200);
+      const withAlertJson = await withAlertRes.json();
+      expect(withAlertJson.staffAlert).toBe(multilineAlert);
+
+      vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            reply: "Here is our menu",
+            sessionId: "fenjan-abc123",
+            orderId: "",
+            staffAlert: "",
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } }
+        )
+      );
+
+      const emptyAlertRes = await chatPost(
+        makeChatReq({ sessionId: "fenjan-abc123", message: "Show the menu" })
+      );
+      expect(emptyAlertRes.status).toBe(200);
+      const emptyAlertJson = await emptyAlertRes.json();
+      expect(emptyAlertJson.staffAlert).toBe("");
     });
   });
 
