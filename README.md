@@ -29,6 +29,8 @@ The browser **never** talks to n8n directly and **never** sees `N8N_BASE_URL` or
 | `/projects/hr-system/apply` | **Apply**: Browse open roles, submit an application with PDF CV (never reveals internal score/decision) |
 | `/projects/hr-system/hr` | **Recruiter Gate**: Passcode login (`HR_DEMO_PASSCODE`) that issues an 8-hour signed `httpOnly` cookie |
 | `/projects/hr-system/hr/dashboard` | **Recruiter Dashboard**: Pipeline stats, filters, candidate drawer, interview invite modal with live email preview, and CSV export |
+| `/projects/pharmacy-system` | **Dawaa Pharmacy**: WhatsApp ordering, Telegram pharmacist approval, execution log, and Google Sheet viewer |
+| `/projects/fenjan-cafe` | **Fenjan Café · Order by DM**: Thin-client café chat, live cart, AI intent badge, open/closed badge, 5s order status polling, and daily special |
 
 ---
 
@@ -59,7 +61,22 @@ NEXT_PUBLIC_TURNSTILE_SITE_KEY=
 # Optional: Upstash Redis for distributed rate limiting
 UPSTASH_REDIS_REST_URL=
 UPSTASH_REDIS_REST_TOKEN=
+
+# Fenjan Café · Order by DM (server-only webhook URLs)
+FENJAN_PORTAL_URL=https://your-n8n-host/webhook/fenjan-portal
+FENJAN_STATUS_URL=https://your-n8n-host/webhook/fenjan-status
+FENJAN_SPECIALS_URL=https://your-n8n-host/webhook/fenjan-specials
+# Optional public link to the kitchen form
+NEXT_PUBLIC_FENJAN_KITCHEN_FORM_URL=
 ```
+
+### Fenjan Café n8n Webhooks
+
+| Env Var | Method | Webhook Path |
+|---|---|---|
+| `FENJAN_PORTAL_URL` | `POST` | `/webhook/fenjan-portal` |
+| `FENJAN_STATUS_URL` | `GET` | `/webhook/fenjan-status` |
+| `FENJAN_SPECIALS_URL` | `GET` | `/webhook/fenjan-specials` |
 
 ### 3. Run the development server
 ```bash

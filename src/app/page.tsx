@@ -39,7 +39,16 @@ export default function HomePage() {
           </h2>
           <p className="hidden text-sm text-muted sm:block">Live interactive demos.</p>
         </div>
-        <ul className={cn("grid gap-6", projects.length > 1 ? "md:grid-cols-2" : "max-w-2xl")}>
+        <ul
+          className={cn(
+            "grid gap-6",
+            projects.length >= 3
+              ? "md:grid-cols-2 lg:grid-cols-3"
+              : projects.length > 1
+                ? "md:grid-cols-2"
+                : "max-w-2xl"
+          )}
+        >
           {projects.map((p) => (
             <li key={p.title}>
               <ProjectCard project={p} />

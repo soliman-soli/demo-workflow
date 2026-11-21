@@ -17,6 +17,9 @@ export const LIMITS = {
   pharmacyDecision: { limit: 30, windowMs: 60_000 },
   pharmacyState: { limit: 120, windowMs: 60_000 },
   pharmacyReset: { limit: 10, windowMs: 60_000 },
+  fenjanChat: { limit: 30, windowMs: 60_000 },
+  fenjanStatus: { limit: 120, windowMs: 60_000 },
+  fenjanSpecial: { limit: 60, windowMs: 60_000 },
 } as const;
 
 export type LimitKey = keyof typeof LIMITS;

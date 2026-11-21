@@ -13,4 +13,5 @@
 - [x] Add `/api/pharmacy/*` routes (`message`, `decision`, `state`, `reset`) reusing `n8nFetch` and `checkRateLimit`
 - [x] Build Dawaa Pharmacy 3-column simulator, Google Sheet viewer, case study, and home card (`/projects/pharmacy-system`)
 - [x] Author n8n deliverables in `docs/pharmacy/` (`customer-message.workflow.json`, `pharmacist-decision.workflow.json`, `expire-reservations.workflow.json`, `google-sheet-schema.md`, `catalog-seed.csv`, `README.md`)
+- [x] Implement Fenjan Café thin-client portal (`/projects/fenjan-cafe`), `/api/fenjan/*` proxy routes, `sitemap.ts`, 3rd home card, and route handler unit tests
 

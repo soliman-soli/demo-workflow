@@ -104,6 +104,15 @@ export const siteConfig = {
       status: "live",
       motif: "pharmacy",
     },
+    {
+      slug: "fenjan-cafe",
+      title: "Fenjan Café · Order by DM",
+      description:
+        "Coffee-shop DM ordering bot: Gemini reads Arabic, English, or Franco requests while Google Sheets enforces menu, prices, hours, and kitchen status.",
+      tags: ["n8n", "Gemini", "Meta Graph API", "Next.js", "TypeScript", "Google Sheets", "Telegram"],
+      status: "live",
+      motif: "cafe",
+    },
   ],
 } as const;
 

@@ -6,4 +6,5 @@
 4. **Rate Limiting**: Uses Upstash Redis REST pipeline when `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` are set, falling back to an in-memory sliding window limiter.
 5. **Candidate Privacy on Apply**: `POST /api/hr/apply` returns `202 Accepted` with `{ ok: true, message }` only, never exposing the screening score or auto-decision to the applicant.
 6. **Dawaa Pharmacy Human-in-the-Loop & Proxy Boundary**: `/api/pharmacy/*` reuses `n8nFetch` (`N8N_PHARMACY_BASE_URL`, `N8N_SECRET` via `X-API-KEY`), validates requests & upstream responses with Zod, verifies uploaded JPEG/PNG/WebP images via magic bytes (`<= 5 MB`) without writing to disk, falls back automatically to the built-in workflow simulator when `N8N_PHARMACY_BASE_URL`/`N8N_SECRET` are unset, and ensures only pharmacist Telegram callbacks can approve Rx orders.
+7. **Fenjan Café Thin Client**: `/projects/fenjan-cafe` and `/api/fenjan/*` are strictly thin proxies (`FENJAN_PORTAL_URL`, `FENJAN_STATUS_URL`, `FENJAN_SPECIALS_URL`) with a 20s timeout, per-IP rate limiting, Zod validation, zero browser-side menu/rules/mocks, and zero message-body logging.
 

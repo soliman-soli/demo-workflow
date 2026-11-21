@@ -1,6 +1,6 @@
 import type { Project } from "@/site.config";
 
-export type ProjectMotif = "hr" | "pharmacy" | "dashboard" | "island" | "video";
+export type ProjectMotif = "hr" | "pharmacy" | "cafe" | "dashboard" | "island" | "video";
 
 /**
  * Quiet, abstract line-art thumbnails. Pure SVG so they theme with CSS
@@ -46,6 +46,24 @@ export function ProjectThumb({ motif }: { motif: Project["motif"] | ProjectMotif
           <rect x="286" y="104" width="64" height="36" rx="8" stroke={clay} opacity="0.85" />
           <circle cx="304" cy="122" r="5" fill={clay} stroke="none" opacity="0.85" />
           <line x1="316" y1="122" x2="338" y2="122" stroke={stroke} opacity="0.55" />
+        </g>
+      )}
+      {motif === "cafe" && (
+        <g fill="none" strokeWidth="1.5">
+          {/* Coffee cup */}
+          <path d="M92 78 h56 v30 a28 28 0 0 1 -56 0 z" stroke={accent} />
+          <path d="M148 86 h10 a10 10 0 0 1 0 20 h-10" stroke={accent} />
+          <line x1="82" y1="142" x2="158" y2="142" stroke={stroke} opacity="0.5" />
+          {/* Steam arcs */}
+          <path d="M108 66 c-4 -8 4 -14 0 -22" stroke={stroke} opacity="0.45" />
+          <path d="M124 64 c-4 -8 4 -14 0 -22" stroke={stroke} opacity="0.45" />
+          {/* Flow connector */}
+          <path d="M174 96 H226" stroke={accent} strokeDasharray="4 4" />
+          {/* DM confirmation bubble */}
+          <rect x="234" y="64" width="106" height="64" rx="12" stroke={stroke} opacity="0.55" />
+          <line x1="250" y1="86" x2="318" y2="86" stroke={stroke} opacity="0.5" />
+          <line x1="250" y1="102" x2="296" y2="102" stroke={stroke} opacity="0.35" />
+          <circle cx="322" cy="108" r="7" fill={clay} stroke="none" opacity="0.85" />
         </g>
       )}
       {motif === "dashboard" && (
