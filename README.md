@@ -62,21 +62,23 @@ NEXT_PUBLIC_TURNSTILE_SITE_KEY=
 UPSTASH_REDIS_REST_URL=
 UPSTASH_REDIS_REST_TOKEN=
 
-# Fenjan Café · Order by DM (server-only webhook URLs)
-FENJAN_PORTAL_URL=https://your-n8n-host/webhook/fenjan-portal
-FENJAN_STATUS_URL=https://your-n8n-host/webhook/fenjan-status
-FENJAN_SPECIALS_URL=https://your-n8n-host/webhook/fenjan-specials
+# Fenjan Café · Order by DM (optional overrides; falls back automatically to N8N_BASE_URL)
+FENJAN_PORTAL_URL=
+FENJAN_STATUS_URL=
+FENJAN_SPECIALS_URL=
 # Optional public link to the kitchen form
 NEXT_PUBLIC_FENJAN_KITCHEN_FORM_URL=
 ```
 
 ### Fenjan Café n8n Webhooks
 
-| Env Var | Method | Webhook Path |
-|---|---|---|
-| `FENJAN_PORTAL_URL` | `POST` | `/webhook/fenjan-portal` |
-| `FENJAN_STATUS_URL` | `GET` | `/webhook/fenjan-status` |
-| `FENJAN_SPECIALS_URL` | `GET` | `/webhook/fenjan-specials` |
+When `FENJAN_*_URL` vars are unset, the route handlers automatically resolve via `N8N_BASE_URL` (and send `X-API-KEY` if `N8N_WEBHOOK_KEY` is set):
+
+| Override Env Var | Fallback from `N8N_BASE_URL` | Method | Webhook Path |
+|---|---|---|---|
+| `FENJAN_PORTAL_URL` | `${N8N_BASE_URL}/fenjan-portal` | `POST` | `/webhook/fenjan-portal` |
+| `FENJAN_STATUS_URL` | `${N8N_BASE_URL}/fenjan-status` | `GET` | `/webhook/fenjan-status` |
+| `FENJAN_SPECIALS_URL` | `${N8N_BASE_URL}/fenjan-specials` | `GET` | `/webhook/fenjan-specials` |
 
 ### 3. Run the development server
 ```bash

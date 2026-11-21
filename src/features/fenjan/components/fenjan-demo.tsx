@@ -89,7 +89,7 @@ async function fetchFenjanJson<T>(
     return {
       ok: false,
       status: res.status,
-      notConnected: body.notConnected === true || res.status === 503,
+      notConnected: body.notConnected === true,
       error: message,
     };
   }
@@ -526,11 +526,11 @@ export function FenjanDemo() {
         </div>
       </div>
 
-      {/* Clear warning banner when FENJAN_*_URL env vars are missing */}
+      {/* Clear warning banner when N8N_BASE_URL / FENJAN_*_URL env vars are missing */}
       {notConnected && (
         <Notice tone="warning">
-          This demo is not connected to n8n right now (<code className="text-xs">FENJAN_*_URL</code>{" "}
-          env vars returned 503). Configure the webhook URLs on the server to chat live.
+          This demo is not connected to n8n right now. Set <code className="text-xs">N8N_BASE_URL</code>{" "}
+          (or <code className="text-xs">FENJAN_*_URL</code>) on the server to chat live.
         </Notice>
       )}
 

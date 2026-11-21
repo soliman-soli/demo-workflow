@@ -7,6 +7,33 @@ export type FenjanEnvVar =
   | "FENJAN_STATUS_URL"
   | "FENJAN_SPECIALS_URL";
 
+const FENJAN_FALLBACK_PATHS: Record<FenjanEnvVar, string> = {
+  FENJAN_PORTAL_URL: "/fenjan-portal",
+  FENJAN_STATUS_URL: "/fenjan-status",
+  FENJAN_SPECIALS_URL: "/fenjan-specials",
+};
+
+/**
+ * Resolves the Fenjan webhook URL: prefers the explicit FENJAN_*_URL override
+ * and automatically falls back to N8N_BASE_URL + /fenjan-* (adding /webhook
+ * if N8N_BASE_URL does not already end with /webhook or /webhook-test).
+ */
+export function resolveFenjanUrl(envName: FenjanEnvVar): string | null {
+  const explicit = process.env[envName]?.trim();
+  if (explicit) return explicit;
+
+  const base = process.env.N8N_BASE_URL?.trim();
+  if (!base) return null;
+
+  const cleanBase = base.replace(/\/+$/, "");
+  const lower = cleanBase.toLowerCase();
+  const suffix = FENJAN_FALLBACK_PATHS[envName];
+  if (lower.endsWith("/webhook") || lower.endsWith("/webhook-test")) {
+    return `${cleanBase}${suffix}`;
+  }
+  return `${cleanBase}/webhook${suffix}`;
+}
+
 export type FenjanUpstreamResult =
   | { ok: true; rawJson: unknown; status: number }
   | { ok: false; error: string; status: number; notConnected?: boolean };
@@ -14,7 +41,8 @@ export type FenjanUpstreamResult =
 /**
  * Server-only helper to call Fenjan n8n webhooks.
  * Enforces a 20s timeout, validates upstream JSON against a zod schema,
- * and never logs customer message bodies, URLs, or secrets.
+ * attaches X-API-KEY when N8N_WEBHOOK_KEY is configured, and never logs
+ * customer message bodies, URLs, or secrets.
  */
 export async function fenjanUpstreamFetch<T>(params: {
   envName: FenjanEnvVar;
@@ -25,7 +53,7 @@ export async function fenjanUpstreamFetch<T>(params: {
   schema: ZodType<T>;
   timeoutMs?: number;
 }): Promise<FenjanUpstreamResult> {
-  const rawUrl = process.env[params.envName]?.trim();
+  const rawUrl = resolveFenjanUrl(params.envName);
   if (!rawUrl) {
     return {
       ok: false,
@@ -55,6 +83,10 @@ export async function fenjanUpstreamFetch<T>(params: {
   }
 
   const headers: Record<string, string> = { Accept: "application/json" };
+  const apiKey = process.env.N8N_WEBHOOK_KEY?.trim();
+  if (apiKey) {
+    headers["X-API-KEY"] = apiKey;
+  }
   if (params.body !== undefined) {
     headers["Content-Type"] = "application/json";
   }

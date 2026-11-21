@@ -78,8 +78,9 @@ describe("Fenjan Café API Route Handlers", () => {
       expect(longMsg.status).toBe(400);
     });
 
-    it("returns 503 notConnected when FENJAN_PORTAL_URL is missing", async () => {
+    it("returns 503 notConnected when FENJAN_PORTAL_URL and N8N_BASE_URL are missing", async () => {
       delete process.env.FENJAN_PORTAL_URL;
+      delete process.env.N8N_BASE_URL;
       const res = await chatPost(
         makeChatReq({ sessionId: "fenjan-abc123", message: "Show the menu" })
       );
@@ -87,6 +88,49 @@ describe("Fenjan Café API Route Handlers", () => {
       const data = await res.json();
       expect(data.notConnected).toBe(true);
       expect(JSON.stringify(data)).not.toContain("n8n.example.com");
+    });
+
+    it("falls back to N8N_BASE_URL and sends X-API-KEY when FENJAN_PORTAL_URL is omitted", async () => {
+      delete process.env.FENJAN_PORTAL_URL;
+      process.env.N8N_BASE_URL = "https://main-n8n.example.com/webhook/";
+      process.env.N8N_WEBHOOK_KEY = "shared-n8n-key";
+
+      const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+        new Response(
+          JSON.stringify({ reply: "Welcome to Fenjan", sessionId: "fenjan-abc123" }),
+          { status: 200, headers: { "Content-Type": "application/json" } }
+        )
+      );
+
+      const res = await chatPost(
+        makeChatReq({ sessionId: "fenjan-abc123", message: "hi" })
+      );
+      expect(res.status).toBe(200);
+      const [calledUrl, init] = fetchSpy.mock.calls[0];
+      expect(calledUrl).toBe("https://main-n8n.example.com/webhook/fenjan-portal");
+      expect((init?.headers as Record<string, string>)["X-API-KEY"]).toBe(
+        "shared-n8n-key"
+      );
+    });
+
+    it("appends /webhook when bare N8N_BASE_URL omits it", async () => {
+      delete process.env.FENJAN_PORTAL_URL;
+      process.env.N8N_BASE_URL = "https://bare-n8n.example.com";
+
+      const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+        new Response(
+          JSON.stringify({ reply: "Hi", sessionId: "fenjan-abc123" }),
+          { status: 200, headers: { "Content-Type": "application/json" } }
+        )
+      );
+
+      const res = await chatPost(
+        makeChatReq({ sessionId: "fenjan-abc123", message: "hi" })
+      );
+      expect(res.status).toBe(200);
+      expect(fetchSpy.mock.calls[0][0]).toBe(
+        "https://bare-n8n.example.com/webhook/fenjan-portal"
+      );
     });
 
     it("returns 504 on timeout (AbortError) and never logs customer message body", async () => {
@@ -217,8 +261,9 @@ describe("Fenjan Café API Route Handlers", () => {
       expect(tooLong.status).toBe(400);
     });
 
-    it("returns 503 notConnected when FENJAN_STATUS_URL is missing", async () => {
+    it("returns 503 notConnected when FENJAN_STATUS_URL and N8N_BASE_URL are missing", async () => {
       delete process.env.FENJAN_STATUS_URL;
+      delete process.env.N8N_BASE_URL;
       const res = await statusGet(makeStatusReq("F-261121-K7Q2"));
       expect(res.status).toBe(503);
       const data = await res.json();
@@ -271,8 +316,9 @@ describe("Fenjan Café API Route Handlers", () => {
   // -------------------------------------------------------------------------
 
   describe("GET /api/fenjan/special", () => {
-    it("returns 503 notConnected when FENJAN_SPECIALS_URL is missing", async () => {
+    it("returns 503 notConnected when FENJAN_SPECIALS_URL and N8N_BASE_URL are missing", async () => {
       delete process.env.FENJAN_SPECIALS_URL;
+      delete process.env.N8N_BASE_URL;
       const res = await specialGet(makeSpecialReq());
       expect(res.status).toBe(503);
       const data = await res.json();
