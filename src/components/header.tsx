@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { ArrowUpRight, Menu, X } from "lucide-react";
+import { ArrowUpRight, ChevronRight, Menu, X } from "lucide-react";
 import { AnimatePresence, m } from "motion/react";
 import { siteConfig } from "@/site.config";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -31,27 +31,23 @@ export function Header() {
   const hasResume = Boolean(siteConfig.contact.resumeUrl);
 
   return (
-    <header className="no-print sticky top-0 z-50 border-b border-border bg-bg/85 backdrop-blur-md">
-      <div className="mx-auto flex h-14 max-w-[1120px] items-center justify-between px-4 sm:px-6">
-        <div className="flex items-center gap-3">
-          <Link
-            href="/"
-            className="font-heading text-[17px] font-semibold tracking-tight text-text transition-colors hover:text-accent"
-          >
-            {siteConfig.name}
-          </Link>
+    <header className="no-print sticky top-0 z-50 border-b border-border/80 bg-bg/80 backdrop-blur-md">
+      <div className="mx-auto flex h-14 max-w-[1120px] items-center justify-between gap-4 px-4 sm:px-6">
+        {/* Brand mark */}
+        <Link
+          href="/"
+          className="group inline-flex items-center gap-2.5 font-heading text-[16px] font-semibold tracking-tight text-text transition-colors hover:text-accent"
+        >
           <span
-            className="hidden items-center gap-1.5 rounded-full border border-border bg-surface px-2.5 py-0.5 text-[11px] font-medium text-muted sm:inline-flex"
-            title="Available for AI automation, backend, and full-stack roles"
+            className="inline-flex h-6 w-6 items-center justify-center rounded-md bg-accent text-accent-contrast transition-transform duration-150 group-hover:scale-105"
+            aria-hidden
           >
-            <span
-              className="h-1.5 w-1.5 rounded-full bg-accent"
-              aria-hidden
-            />
-            Open to roles
+            <ChevronRight className="h-4 w-4 stroke-[2.5]" />
           </span>
-        </div>
+          <span>{siteConfig.name}</span>
+        </Link>
 
+        {/* Centered nav links */}
         <nav
           className="hidden items-center gap-1 md:flex"
           aria-label="Main"
@@ -60,7 +56,8 @@ export function Header() {
           {navLinks.map((l) => {
             const isActive =
               l.matchPrefix !== null && pathname.startsWith(l.matchPrefix);
-            const showIndicator = hovered === l.href || (hovered === null && isActive);
+            const showIndicator =
+              hovered === l.href || (hovered === null && isActive);
             return (
               <Link
                 key={l.href}
@@ -81,7 +78,6 @@ export function Header() {
               </Link>
             );
           })}
-
           {hasResume ? (
             <a
               href={siteConfig.contact.resumeUrl}
@@ -93,12 +89,30 @@ export function Header() {
               <ArrowUpRight className="h-3.5 w-3.5" aria-hidden />
             </a>
           ) : null}
-
-          <div className="ml-2 pl-2 border-l border-border">
-            <ThemeToggle />
-          </div>
         </nav>
 
+        {/* Right telemetry pill + lime CTA + theme toggle */}
+        <div className="hidden items-center gap-2.5 md:flex">
+          <span
+            className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface/80 px-2.5 py-1 font-mono text-[11px] text-muted"
+            title="All 4 n8n portfolio systems are live"
+          >
+            <span
+              className="h-1.5 w-1.5 rounded-full bg-accent"
+              aria-hidden
+            />
+            all systems live
+          </span>
+          <Link
+            href="/#contact"
+            className="inline-flex h-8 items-center justify-center rounded-full bg-accent px-3.5 text-xs font-semibold text-accent-contrast transition-colors hover:bg-accent-hover"
+          >
+            Get in touch
+          </Link>
+          <ThemeToggle />
+        </div>
+
+        {/* Mobile controls */}
         <div className="flex items-center gap-2 md:hidden">
           <ThemeToggle />
           <button

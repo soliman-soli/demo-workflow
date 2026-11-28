@@ -3,15 +3,15 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  /* Swiss Precision Systems — Light */
-  --color-bg: #f7f8fa;
+  /* Calibrated Light Mode (complements Obsidian + Lime Dark default) */
+  --color-bg: #f6f8f5;
   --color-surface: #ffffff;
-  --color-surface-2: #eef1f5;
-  --color-border: #dce2ea;
-  --color-text: #0e1116;
-  --color-muted: #5a6474;
-  --color-accent: #0f766e;
-  --color-accent-hover: #0d5f59;
+  --color-surface-2: #edf1eb;
+  --color-border: #d7dfd4;
+  --color-text: #0c100d;
+  --color-muted: #525f55;
+  --color-accent: #4d7c0f;
+  --color-accent-hover: #3f6212;
   --color-accent-contrast: #ffffff;
   --color-highlight: #0284c7;
 
@@ -40,23 +40,23 @@
 }
 
 .dark {
-  /* Swiss Precision Systems — Dark */
-  --color-bg: #0c0f14;
-  --color-surface: #131820;
-  --color-surface-2: #1a212c;
-  --color-border: #252e3c;
-  --color-text: #edf1f7;
-  --color-muted: #8e99aa;
-  --color-accent: #2dd4bf;
-  --color-accent-hover: #5eead4;
-  --color-accent-contrast: #06211e;
+  /* Obsidian + Electric Lime Instrument Palette */
+  --color-bg: #060807;
+  --color-surface: #0d110e;
+  --color-surface-2: #141a16;
+  --color-border: #1e2720;
+  --color-text: #f0f4f0;
+  --color-muted: #8a978c;
+  --color-accent: #c8f542;
+  --color-accent-hover: #d8fa6b;
+  --color-accent-contrast: #080c06;
   --color-highlight: #38bdf8;
 
-  --color-success: #34d399;
+  --color-success: #4ade80;
   --color-warning: #fbbf24;
   --color-danger: #fb7185;
   --color-info: #38bdf8;
-  --color-success-text: #6ee7b7;
+  --color-success-text: #86efac;
   --color-warning-text: #fcd34d;
   --color-danger-text: #fda4af;
   --color-info-text: #7dd3fc;
@@ -88,30 +88,31 @@ h1, h2, h3, .font-heading {
 }
 
 ::selection {
-  background: color-mix(in srgb, var(--color-accent) 22%, transparent);
+  background: color-mix(in srgb, var(--color-accent) 26%, transparent);
 }
 
-/* Subtle architectural surface polish in dark mode */
+/* Tactile dark-glass surface card */
 .surface-card {
-  background: var(--color-surface);
+  background: color-mix(in srgb, var(--color-surface) 88%, transparent);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-card);
+  backdrop-filter: blur(8px);
 }
 
 .dark .surface-card {
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 /* Subtle dot-grid backdrop for technical schematics */
 .schematic-grid {
   background-image: radial-gradient(
-    color-mix(in srgb, var(--color-muted) 22%, transparent) 1px,
+    color-mix(in srgb, var(--color-muted) 20%, transparent) 1px,
     transparent 1px
   );
   background-size: 16px 16px;
 }
 
-/* Restrained technical label (preserves class name used in case-study pages) */
+/* Restrained technical label */
 .label-caps {
   font-family: var(--font-mono);
   font-size: 0.75rem;
