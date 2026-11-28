@@ -13,18 +13,29 @@ export default function HomePage() {
   return (
     <div className="mx-auto max-w-[1120px] px-4 sm:px-6">
       {/* Hero */}
-      <section className="grid grid-cols-12 gap-6 pb-16 pt-16 sm:pt-24 md:pb-24" aria-labelledby="hero-title">
+      <section
+        className="grid grid-cols-12 gap-6 pb-16 pt-16 sm:pt-24 md:pb-24"
+        aria-labelledby="hero-title"
+      >
         <div className="col-span-12 lg:col-span-9">
           <p className="label-caps mb-5">{hero.eyebrow}</p>
-          <h1 id="hero-title" className="text-[2.25rem] leading-[1.1] font-medium sm:text-5xl lg:text-[4rem] lg:leading-[1.05]">
+          <h1
+            id="hero-title"
+            className="text-[2.25rem] leading-[1.1] font-medium sm:text-5xl lg:text-[4rem] lg:leading-[1.05]"
+          >
             {hero.headline}
           </h1>
-          <p className="mt-6 max-w-2xl text-base leading-relaxed text-muted sm:text-lg">{hero.sub}</p>
+          <p className="mt-6 max-w-2xl text-base leading-relaxed text-muted sm:text-lg">
+            {hero.sub}
+          </p>
           <div className="mt-9 flex flex-wrap gap-3">
             <Link href="#projects" className={buttonVariants({ size: "lg" })}>
               See projects <ArrowRight className="h-4 w-4" aria-hidden />
             </Link>
-            <Link href="#contact" className={buttonVariants({ variant: "outline", size: "lg" })}>
+            <Link
+              href="#contact"
+              className={buttonVariants({ variant: "outline", size: "lg" })}
+            >
               Contact
             </Link>
           </div>
@@ -32,12 +43,18 @@ export default function HomePage() {
       </section>
 
       {/* Projects */}
-      <section id="projects" className="border-t border-border py-16 md:py-20" aria-labelledby="projects-title">
+      <section
+        id="projects"
+        className="border-t border-border py-16 md:py-20"
+        aria-labelledby="projects-title"
+      >
         <div className="mb-8 flex items-end justify-between gap-4">
           <h2 id="projects-title" className="text-3xl font-medium">
             Projects
           </h2>
-          <p className="hidden text-sm text-muted sm:block">Live interactive demos.</p>
+          <p className="hidden text-sm text-muted sm:block">
+            Live interactive demos.
+          </p>
         </div>
         <ul
           className={cn(
@@ -46,7 +63,7 @@ export default function HomePage() {
               ? "md:grid-cols-2 lg:grid-cols-3"
               : projects.length > 1
                 ? "md:grid-cols-2"
-                : "max-w-2xl"
+                : "max-w-2xl",
           )}
         >
           {projects.map((p) => (
@@ -58,17 +75,28 @@ export default function HomePage() {
       </section>
 
       {/* About */}
-      <section id="about" className="grid grid-cols-12 gap-6 border-t border-border py-16 md:py-20" aria-labelledby="about-title">
-        <h2 id="about-title" className="col-span-12 text-3xl font-medium md:col-span-4">
+      <section
+        id="about"
+        className="grid grid-cols-12 gap-6 border-t border-border py-16 md:py-20"
+        aria-labelledby="about-title"
+      >
+        <h2
+          id="about-title"
+          className="col-span-12 text-3xl font-medium md:col-span-4"
+        >
           About
         </h2>
         <div className="col-span-12 md:col-span-8">
-          <p className="max-w-2xl text-base leading-relaxed text-muted">{about.intro}</p>
+          <p className="max-w-2xl text-base leading-relaxed text-muted">
+            {about.intro}
+          </p>
           <dl className="mt-10 grid gap-x-8 gap-y-6 sm:grid-cols-2">
             {about.skills.map((s) => (
               <div key={s.group} className="border-t border-border pt-4">
                 <dt className="label-caps">{s.group}</dt>
-                <dd className="mt-2 text-sm leading-relaxed">{s.items.join(" · ")}</dd>
+                <dd className="mt-2 text-sm leading-relaxed">
+                  {s.items.join(" · ")}
+                </dd>
               </div>
             ))}
           </dl>
@@ -76,16 +104,42 @@ export default function HomePage() {
       </section>
 
       {/* Contact */}
-      <section id="contact" className="grid grid-cols-12 gap-6 border-t border-border py-16 md:py-20" aria-labelledby="contact-title">
-        <h2 id="contact-title" className="col-span-12 text-3xl font-medium md:col-span-4">
+      <section
+        id="contact"
+        className="grid grid-cols-12 gap-6 border-t border-border py-16 md:py-20"
+        aria-labelledby="contact-title"
+      >
+        <h2
+          id="contact-title"
+          className="col-span-12 text-3xl font-medium md:col-span-4"
+        >
           Contact
         </h2>
         <div className="col-span-12 md:col-span-8">
-          <p className="max-w-xl text-base leading-relaxed text-muted">{contact.blurb}</p>
+          <p className="max-w-xl text-base leading-relaxed text-muted">
+            {contact.blurb}
+          </p>
           <ul className="mt-8 divide-y divide-border border-y border-border">
-            <ContactRow icon={<Mail className="h-4 w-4" />} label="Email" value={contact.email} href={`mailto:${contact.email}`} />
-            <ContactRow icon={<GithubIcon />} label="GitHub" value={contact.github.replace(/^https?:\/\/(www\.)?/, "")} href={contact.github} external />
-            <ContactRow icon={<LinkedinIcon />} label="LinkedIn" value={contact.linkedin.replace(/^https?:\/\/(www\.)?/, "")} href={contact.linkedin} external />
+            <ContactRow
+              icon={<Mail className="h-4 w-4" />}
+              label="Email"
+              value={contact.email}
+              href={`mailto:${contact.email}`}
+            />
+            <ContactRow
+              icon={<GithubIcon />}
+              label="GitHub"
+              value={contact.github.replace(/^https?:\/\/(www\.)?/, "")}
+              href={contact.github}
+              external
+            />
+            <ContactRow
+              icon={<LinkedinIcon />}
+              label="LinkedIn"
+              value={contact.linkedin.replace(/^https?:\/\/(www\.)?/, "")}
+              href={contact.linkedin}
+              external
+            />
           </ul>
         </div>
       </section>
@@ -106,13 +160,19 @@ function ProjectCard({ project }: { project: Project }) {
           <h3 className="text-xl font-medium">{project.title}</h3>
           {live ? (
             <Badge tone="accent">
-              <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden /> Live demo
+              <span
+                className="h-1.5 w-1.5 rounded-full bg-accent"
+                aria-hidden
+              />{" "}
+              Live demo
             </Badge>
           ) : (
             <Badge tone="neutral">In progress</Badge>
           )}
         </div>
-        <p className="mt-2 text-sm leading-relaxed text-muted">{project.description}</p>
+        <p className="mt-2 text-sm leading-relaxed text-muted">
+          {project.description}
+        </p>
         <div className="mt-4 flex flex-wrap gap-1.5">
           {project.tags.map((t) => (
             <Tag key={t}>{t}</Tag>
@@ -121,7 +181,11 @@ function ProjectCard({ project }: { project: Project }) {
         <div className="mt-auto pt-5 text-sm">
           {live ? (
             <span className="inline-flex items-center gap-1 font-medium text-accent">
-              Open case study and demo <ArrowUpRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" aria-hidden />
+              Open case study and demo{" "}
+              <ArrowUpRight
+                className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                aria-hidden
+              />
             </span>
           ) : (
             <span className="text-muted">Case study coming soon</span>
@@ -131,20 +195,27 @@ function ProjectCard({ project }: { project: Project }) {
     </>
   );
 
-  const base = "flex h-full flex-col overflow-hidden rounded-[var(--radius-card)] border border-border bg-surface";
+  const base =
+    "flex h-full flex-col overflow-hidden rounded-[var(--radius-card)] border border-border bg-surface";
 
   if (live) {
     return (
       <Link
         href={`/projects/${project.slug}`}
-        className={cn(base, "group transition-[transform,box-shadow,border-color] duration-200 ease-out hover:-translate-y-0.5 hover:shadow-[0_8px_24px_-12px_rgba(27,31,36,0.18)] hover:border-accent/40 focus-visible:-translate-y-0.5")}
+        className={cn(
+          base,
+          "group transition-[transform,box-shadow,border-color] duration-200 ease-out hover:-translate-y-0.5 hover:shadow-[0_8px_24px_-12px_rgba(27,31,36,0.18)] hover:border-accent/40 focus-visible:-translate-y-0.5",
+        )}
       >
         {inner}
       </Link>
     );
   }
   return (
-    <article className={cn(base, "opacity-95")} aria-label={`${project.title} (in progress)`}>
+    <article
+      className={cn(base, "opacity-95")}
+      aria-label={`${project.title} (in progress)`}
+    >
       {inner}
     </article>
   );
@@ -175,7 +246,10 @@ function ContactRow({
         </span>
         <span className="w-20 text-sm text-muted">{label}</span>
         <span className="flex-1 truncate text-sm font-medium">{value}</span>
-        <ArrowUpRight className="h-4 w-4 text-muted group-hover:text-accent" aria-hidden />
+        <ArrowUpRight
+          className="h-4 w-4 text-muted group-hover:text-accent"
+          aria-hidden
+        />
       </a>
     </li>
   );

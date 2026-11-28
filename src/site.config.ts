@@ -11,7 +11,8 @@ export const siteConfig = {
 
   hero: {
     eyebrow: "Computer engineering student",
-    headline: "I build backend-first products and AI automations that do real work.",
+    headline:
+      "I build backend-first products and AI automations that do real work.",
     sub: "APIs, workflows and the interfaces on top of them, from a C++ desktop dashboard to an AI-screened hiring pipeline.",
   },
 
@@ -74,13 +75,23 @@ export const siteConfig = {
       },
       {
         group: "Languages & Frontend",
-        items: ["Python", "JavaScript (ES6+)", "C++", "PHP", "React", "HTML5", "CSS3", "AJAX"],
+        items: [
+          "Python",
+          "JavaScript (ES6+)",
+          "C++",
+          "PHP",
+          "React",
+          "HTML5",
+          "CSS3",
+          "AJAX",
+        ],
       },
     ],
   },
 
   contact: {
-    blurb: "Open to internships and junior backend or full-stack roles. The fastest way to reach me is email.",
+    blurb:
+      "Open to internships and junior backend or full-stack roles. The fastest way to reach me is email.",
     email: "soliman.solim22@gmail.com",
     github: "https://github.com/soliman",
     linkedin: "https://www.linkedin.com/in/soliman",
@@ -90,7 +101,8 @@ export const siteConfig = {
     {
       slug: "hr-system",
       title: "HR Demo",
-      description: "An AI-powered HR system: policy Q&A, CV coaching, screened applications and a recruiter dashboard.",
+      description:
+        "An AI-powered HR system: policy Q&A, CV coaching, screened applications and a recruiter dashboard.",
       tags: ["n8n", "Gemini", "Next.js", "TypeScript", "Google Sheets"],
       status: "live",
       motif: "hr",
@@ -100,7 +112,15 @@ export const siteConfig = {
       title: "Dawaa Pharmacy",
       description:
         "WhatsApp pharmacy ordering: AI reads requests and prescriptions, auto-reserves safe orders, and routes the rest to a pharmacist on Telegram.",
-      tags: ["n8n", "Gemini", "Next.js", "TypeScript", "Google Sheets", "WhatsApp", "Telegram"],
+      tags: [
+        "n8n",
+        "Gemini",
+        "Next.js",
+        "TypeScript",
+        "Google Sheets",
+        "WhatsApp",
+        "Telegram",
+      ],
       status: "live",
       motif: "pharmacy",
     },
@@ -109,9 +129,26 @@ export const siteConfig = {
       title: "Fenjan Café · Order by DM",
       description:
         "Coffee-shop DM ordering bot: Gemini reads Arabic, English, or Franco requests while Google Sheets enforces menu, prices, hours, and kitchen status.",
-      tags: ["n8n", "Gemini", "Meta Graph API", "Next.js", "TypeScript", "Google Sheets", "Telegram"],
+      tags: [
+        "n8n",
+        "Gemini",
+        "Meta Graph API",
+        "Next.js",
+        "TypeScript",
+        "Google Sheets",
+        "Telegram",
+      ],
       status: "live",
       motif: "cafe",
+    },
+    {
+      slug: "mozakra",
+      title: "Mozakra · AI Study Coach",
+      description:
+        "Paste a lecture or upload a PDF: Gemini writes the quiz, code validates every question, and spaced repetition decides when each one comes back.",
+      tags: ["n8n", "Gemini", "Google Sheets", "Google Drive", "Gmail", "Google Docs"],
+      status: "live",
+      motif: "study",
     },
   ],
 } as const;

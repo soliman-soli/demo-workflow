@@ -12,6 +12,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/projects/hr-system/hr/dashboard",
     "/projects/pharmacy-system",
     "/projects/fenjan-cafe",
+    "/projects/mozakra",
   ];
 
   return routes.map((route) => ({

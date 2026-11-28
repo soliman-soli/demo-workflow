@@ -20,6 +20,11 @@ export const LIMITS = {
   fenjanChat: { limit: 30, windowMs: 60_000 },
   fenjanStatus: { limit: 120, windowMs: 60_000 },
   fenjanSpecial: { limit: 60, windowMs: 60_000 },
+  mozakraStart: { limit: 5, windowMs: 600_000 },
+  mozakraGrade: { limit: 60, windowMs: 600_000 },
+  mozakraNext: { limit: 60, windowMs: 600_000 },
+  mozakraState: { limit: 60, windowMs: 600_000 },
+  mozakraOverview: { limit: 60, windowMs: 600_000 },
 } as const;
 
 export type LimitKey = keyof typeof LIMITS;
@@ -45,12 +50,14 @@ export function rateLimitMemory(
   ip: string,
   key: string,
   limit: number,
-  windowMs: number
+  windowMs: number,
 ): RateLimitResult {
   const now = Date.now();
   sweep(now);
   const compositeKey = `${key}:${ip}`;
-  const stamps = (store.get(compositeKey) ?? []).filter((t) => now - t < windowMs);
+  const stamps = (store.get(compositeKey) ?? []).filter(
+    (t) => now - t < windowMs,
+  );
 
   if (stamps.length >= limit) {
     store.set(compositeKey, stamps);
@@ -59,7 +66,11 @@ export function rateLimitMemory(
 
   stamps.push(now);
   store.set(compositeKey, stamps);
-  return { success: true, remaining: limit - stamps.length, reset: stamps[0] + windowMs };
+  return {
+    success: true,
+    remaining: limit - stamps.length,
+    reset: stamps[0] + windowMs,
+  };
 }
 
 /** Kept for backwards compatibility with earlier callers. */
@@ -75,13 +86,16 @@ async function rateLimitUpstash(
   ip: string,
   key: string,
   limit: number,
-  windowMs: number
+  windowMs: number,
 ): Promise<RateLimitResult> {
   const windowId = Math.floor(Date.now() / windowMs);
   const redisKey = `rl:${key}:${ip}:${windowId}`;
   const res = await fetch(`${url}/pipeline`, {
     method: "POST",
-    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify([
       ["INCR", redisKey],
       ["PEXPIRE", redisKey, String(windowMs)],
@@ -92,7 +106,11 @@ async function rateLimitUpstash(
   const data = (await res.json()) as Array<{ result: number }>;
   const count = Number(data[0]?.result ?? 0);
   const reset = (windowId + 1) * windowMs;
-  return { success: count <= limit, remaining: Math.max(0, limit - count), reset };
+  return {
+    success: count <= limit,
+    remaining: Math.max(0, limit - count),
+    reset,
+  };
 }
 
 /**
@@ -101,7 +119,7 @@ async function rateLimitUpstash(
  */
 export async function checkRateLimit(
   request: NextRequest,
-  key: LimitKey
+  key: LimitKey,
 ): Promise<RateLimitResult> {
   const ip = getClientIp(request);
   const { limit, windowMs } = LIMITS[key];
