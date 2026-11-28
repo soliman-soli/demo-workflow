@@ -1,7 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { JetBrains_Mono, Plus_Jakarta_Sans } from "next/font/google";
-import { ThemeProvider } from "@/components/theme-provider";
 import { MotionProvider } from "@/components/motion-provider";
+import { SmoothScroll } from "@/components/smooth-scroll";
+import { ScrollProgress } from "@/components/scroll-progress";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { ToastProvider } from "@/components/ui/toast";
@@ -42,10 +43,8 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#F6F8F5" },
-    { media: "(prefers-color-scheme: dark)", color: "#060807" },
-  ],
+  themeColor: "#060807",
+  colorScheme: "dark",
 };
 
 export default function RootLayout({
@@ -56,27 +55,26 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      suppressHydrationWarning
       className={`${plusJakartaSans.variable} ${jetbrainsMono.variable}`}
     >
-      <body suppressHydrationWarning className="flex min-h-screen flex-col">
-        <ThemeProvider>
-          <MotionProvider>
-            <ToastProvider>
-              <a
-                href="#main"
-                className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-3 focus:z-[100] focus:rounded-[var(--radius-btn)] focus:border focus:border-border focus:bg-surface focus:px-3 focus:py-2 focus:text-sm focus:font-medium"
-              >
-                Skip to content
-              </a>
-              <Header />
-              <main id="main" className="flex-1">
-                {children}
-              </main>
-              <Footer />
-            </ToastProvider>
-          </MotionProvider>
-        </ThemeProvider>
+      <body className="flex min-h-screen flex-col">
+        <MotionProvider>
+          <SmoothScroll />
+          <ScrollProgress />
+          <ToastProvider>
+            <a
+              href="#main"
+              className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-3 focus:z-[100] focus:rounded-[var(--radius-btn)] focus:border focus:border-border focus:bg-surface focus:px-3 focus:py-2 focus:text-sm focus:font-medium"
+            >
+              Skip to content
+            </a>
+            <Header />
+            <main id="main" className="flex-1">
+              {children}
+            </main>
+            <Footer />
+          </ToastProvider>
+        </MotionProvider>
       </body>
     </html>
   );

@@ -40,7 +40,7 @@ export function Dialog({ open, onOpenChange, title, description, children, foote
               <X className="h-4 w-4" />
             </RD.Close>
           </div>
-          <div className="overflow-y-auto px-5 py-4">{children}</div>
+          <div data-lenis-prevent className="overflow-y-auto px-5 py-4">{children}</div>
           {footer && <div className="flex justify-end gap-2 border-t border-border px-5 py-3">{footer}</div>}
         </RD.Content>
       </RD.Portal>
@@ -73,7 +73,7 @@ export function Drawer({ open, onOpenChange, title, description, children, foote
               <X className="h-4 w-4" />
             </RD.Close>
           </div>
-          <div className="flex-1 overflow-y-auto px-5 py-5">{children}</div>
+          <div data-lenis-prevent className="flex-1 overflow-y-auto px-5 py-5">{children}</div>
           {footer && <div className="border-t border-border px-5 py-3">{footer}</div>}
         </RD.Content>
       </RD.Portal>

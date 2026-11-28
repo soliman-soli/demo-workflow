@@ -23,7 +23,7 @@ export function ProjectThumb({
   const signal = "var(--color-highlight)";
 
   return (
-    <div className="schematic-grid h-full w-full bg-surface-2/70 transition-transform duration-300 ease-out group-hover:scale-[1.02]">
+    <div className="schematic-grid h-full w-full bg-surface-2/60">
       <svg
         viewBox="0 0 400 180"
         className="h-full w-full"
