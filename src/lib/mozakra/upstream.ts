@@ -103,7 +103,10 @@ export async function mozakraUpstreamFetch<T>(params: {
   timeoutMs: number;
 }): Promise<MozakraUpstreamResult<T>> {
   const targetUrlStr = resolveMozakraUrl(params.endpoint);
-  const apiKey = process.env.N8N_MOZAKRA_KEY?.trim();
+  const apiKey =
+    process.env.N8N_MOZAKRA_KEY?.trim() ||
+    process.env.N8N_WEBHOOK_KEY?.trim() ||
+    process.env.N8N_SECRET?.trim();
 
   if (!targetUrlStr || !apiKey) {
     return { ok: false, status: 503, error: MOZAKRA_OFFLINE_ERROR };

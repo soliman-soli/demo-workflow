@@ -97,11 +97,45 @@ describe("Mozakra Live Portal API Route Handlers", () => {
 
     it("returns offline error when env vars are missing", async () => {
       delete process.env.N8N_MOZAKRA_KEY;
+      delete process.env.N8N_WEBHOOK_KEY;
+      delete process.env.N8N_SECRET;
       const res = await startPost(makeStartReq({ text: SAMPLE_LECTURE_TEXT }));
       expect(res.status).toBe(503);
       const data = await res.json();
       expect(data.ok).toBe(false);
       expect(data.error).toBe("The live demo backend is offline right now.");
+    });
+
+    it("falls back to N8N_WEBHOOK_KEY when N8N_MOZAKRA_KEY is unset", async () => {
+      delete process.env.N8N_MOZAKRA_KEY;
+      process.env.N8N_WEBHOOK_KEY = "shared-base-webhook-key";
+
+      const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+        new Response(
+          JSON.stringify({
+            ok: true,
+            updatedAt: "2026-11-28T09:00:00Z",
+            lectures: 1,
+            questionsInBank: 5,
+            sessions: 1,
+            quizzesSent: 1,
+            quizzesCompleted: 1,
+            completionRate: 100,
+            averageScore: 80,
+            boxDistribution: { "1": 1, "2": 2, "3": 1, "4": 1 },
+            weakestTopics: [],
+            hardestQuestions: [],
+            errorsLast7Days: 0,
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } }
+        )
+      );
+
+      const res = await overviewGet(makeOverviewReq());
+      expect(res.status).toBe(200);
+      const [, init] = fetchSpy.mock.calls[0];
+      const headers = init?.headers as Record<string, string>;
+      expect(headers["x-api-key"]).toBe("shared-base-webhook-key");
     });
 
     it("sets httpOnly sessionId cookie, strips sessionId from JSON, and adds ngrok header", async () => {
