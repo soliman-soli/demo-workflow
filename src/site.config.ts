@@ -10,11 +10,30 @@ export const siteConfig = {
   footerNote: "Built with Next.js and n8n.",
 
   hero: {
-    eyebrow: "Computer engineering student",
+    eyebrow: "AI Automation & Systems Engineer",
     headline:
-      "I build backend-first products and AI automations that do real work.",
-    sub: "APIs, workflows and the interfaces on top of them, from a C++ desktop dashboard to an AI-screened hiring pipeline.",
+      "I design and ship AI workflows and backend systems that run real operations.",
+    sub: "LLM pipelines, RAG retrieval, REST APIs, and the clean interfaces on top of them — every project below runs live against real automation workflows.",
   },
+
+  highlights: [
+    {
+      value: "4 live systems",
+      label: "Interactive n8n + Gemini workflows backed by live sheets and messaging",
+    },
+    {
+      value: "30+ repos / < 2 min",
+      label: "Automated GitHub candidate analysis with LangChain, CodeBERT, and Qdrant",
+    },
+    {
+      value: "Multi-channel",
+      label: "WhatsApp, Telegram, Meta DM, Gmail, and REST API orchestration",
+    },
+    {
+      value: "Full-stack core",
+      label: "Python (FastAPI), TypeScript (Next.js / Node.js), SQL, and Docker",
+    },
+  ],
 
   about: {
     intro:
@@ -91,10 +110,11 @@ export const siteConfig = {
 
   contact: {
     blurb:
-      "Open to internships and junior backend or full-stack roles. The fastest way to reach me is email.",
+      "Open to AI automation, backend, and full-stack roles or internships. Email is the fastest way to reach me.",
     email: "soliman.solim22@gmail.com",
-    github: "https://github.com/soliman",
-    linkedin: "https://www.linkedin.com/in/soliman",
+    github: "https://github.com/soliman-soli",
+    linkedin: "https://www.linkedin.com/in/soliman-ahmed-software",
+    resumeUrl: "",
   },
 
   projects: [

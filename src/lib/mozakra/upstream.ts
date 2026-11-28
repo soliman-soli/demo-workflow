@@ -72,7 +72,7 @@ export async function validateMozakraPdf(file: File): Promise<PdfCheckResult> {
  * with /webhook (https://host/webhook).
  */
 export function resolveMozakraUrl(
-  endpoint: MozakraLiveEndpoint
+  endpoint: MozakraLiveEndpoint,
 ): string | null {
   const base = process.env.N8N_BASE_URL?.trim();
   if (!base) return null;
@@ -157,7 +157,7 @@ export async function mozakraUpstreamFetch<T>(params: {
       json = await res.json();
     } catch {
       console.error(
-        `[mozakra] ${method} ${params.endpoint} -> ${res.status} (non-JSON)`
+        `[mozakra] ${method} ${params.endpoint} -> ${res.status} (non-JSON)`,
       );
       return { ok: false, status: 502, error: MOZAKRA_OFFLINE_ERROR };
     }
@@ -165,7 +165,7 @@ export async function mozakraUpstreamFetch<T>(params: {
     const parsed = params.schema.safeParse(json);
     if (!parsed.success) {
       console.error(
-        `[mozakra] ${method} ${params.endpoint} -> ${res.status} (schema mismatch)`
+        `[mozakra] ${method} ${params.endpoint} -> ${res.status} (schema mismatch)`,
       );
       return { ok: false, status: 502, error: MOZAKRA_OFFLINE_ERROR };
     }
@@ -182,4 +182,3 @@ export async function mozakraUpstreamFetch<T>(params: {
     clearTimeout(timer);
   }
 }
-

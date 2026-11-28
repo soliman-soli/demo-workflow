@@ -91,7 +91,9 @@ describe("Mozakra Live Portal API Route Handlers", () => {
       const shortRes = await startPost(makeStartReq({ text: "short" }));
       expect(shortRes.status).toBe(400);
 
-      const longRes = await startPost(makeStartReq({ text: "a".repeat(30_001) }));
+      const longRes = await startPost(
+        makeStartReq({ text: "a".repeat(30_001) }),
+      );
       expect(longRes.status).toBe(400);
     });
 
@@ -127,8 +129,8 @@ describe("Mozakra Live Portal API Route Handlers", () => {
             hardestQuestions: [],
             errorsLast7Days: 0,
           }),
-          { status: 200, headers: { "Content-Type": "application/json" } }
-        )
+          { status: 200, headers: { "Content-Type": "application/json" } },
+        ),
       );
 
       const res = await overviewGet(makeOverviewReq());
@@ -166,15 +168,17 @@ describe("Mozakra Live Portal API Route Handlers", () => {
               ],
             },
           }),
-          { status: 200, headers: { "Content-Type": "application/json" } }
-        )
+          { status: 200, headers: { "Content-Type": "application/json" } },
+        ),
       );
 
       const res = await startPost(makeStartReq({ text: SAMPLE_LECTURE_TEXT }));
       expect(res.status).toBe(200);
 
       const [url, init] = fetchSpy.mock.calls[0];
-      expect(url).toBe("https://demo-xyz.ngrok-free.app/webhook/mozakra/live/start");
+      expect(url).toBe(
+        "https://demo-xyz.ngrok-free.app/webhook/mozakra/live/start",
+      );
       const headers = init?.headers as Record<string, string>;
       expect(headers["x-api-key"]).toBe("secret-mozakra-key");
       expect(headers["ngrok-skip-browser-warning"]).toBe("true");
@@ -193,12 +197,12 @@ describe("Mozakra Live Portal API Route Handlers", () => {
   describe("POST /api/mozakra/grade", () => {
     it("validates 32-hex token and A-D answers", async () => {
       const badToken = await gradePost(
-        makeGradeReq({ token: "not-hex", answers: { q1: "A" } })
+        makeGradeReq({ token: "not-hex", answers: { q1: "A" } }),
       );
       expect(badToken.status).toBe(400);
 
       const badAnswer = await gradePost(
-        makeGradeReq({ token: VALID_HEX32, answers: { q1: "Z" } })
+        makeGradeReq({ token: VALID_HEX32, answers: { q1: "Z" } }),
       );
       expect(badAnswer.status).toBe(400);
     });
@@ -211,12 +215,12 @@ describe("Mozakra Live Portal API Route Handlers", () => {
             status: 409,
             error: "This quiz was already submitted.",
           }),
-          { status: 409, headers: { "Content-Type": "application/json" } }
-        )
+          { status: 409, headers: { "Content-Type": "application/json" } },
+        ),
       );
 
       const res = await gradePost(
-        makeGradeReq({ token: VALID_HEX32, answers: { q1: "A" } })
+        makeGradeReq({ token: VALID_HEX32, answers: { q1: "A" } }),
       );
       expect(res.status).toBe(409);
       const data = await res.json();
@@ -230,7 +234,7 @@ describe("Mozakra Live Portal API Route Handlers", () => {
       expect(noCookie.status).toBe(400);
 
       const badDays = await nextPost(
-        makeNextReq({ daysForward: 5 }, VALID_HEX32)
+        makeNextReq({ daysForward: 5 }, VALID_HEX32),
       );
       expect(badDays.status).toBe(400);
 
@@ -249,8 +253,8 @@ describe("Mozakra Live Portal API Route Handlers", () => {
               none: true,
               message: "Nothing due yet.",
             }),
-            { status: 200, headers: { "Content-Type": "application/json" } }
-          )
+            { status: 200, headers: { "Content-Type": "application/json" } },
+          ),
         )
         .mockResolvedValueOnce(
           new Response(
@@ -261,11 +265,13 @@ describe("Mozakra Live Portal API Route Handlers", () => {
               cards: [],
               quizzes: [],
             }),
-            { status: 200, headers: { "Content-Type": "application/json" } }
-          )
+            { status: 200, headers: { "Content-Type": "application/json" } },
+          ),
         );
 
-      const nextRes = await nextPost(makeNextReq({ daysForward: 1 }, VALID_HEX32));
+      const nextRes = await nextPost(
+        makeNextReq({ daysForward: 1 }, VALID_HEX32),
+      );
       expect(nextRes.status).toBe(200);
       expect(JSON.parse(String(fetchSpy.mock.calls[0][1]?.body))).toEqual({
         sessionId: VALID_HEX32,
@@ -293,8 +299,12 @@ describe("Mozakra Live Portal API Route Handlers", () => {
         completionRate: 80,
         averageScore: 76,
         boxDistribution: { "1": 8, "2": 14, "3": 10, "4": 4 },
-        weakestTopics: [{ topic: "Rehashing", percentCorrect: 55, answers: 11 }],
-        hardestQuestions: [{ question: "Why rehash?", percentCorrect: 40, answers: 10 }],
+        weakestTopics: [
+          { topic: "Rehashing", percentCorrect: 55, answers: 11 },
+        ],
+        hardestQuestions: [
+          { question: "Why rehash?", percentCorrect: 40, answers: 10 },
+        ],
         errorsLast7Days: 0,
       };
 
@@ -302,7 +312,7 @@ describe("Mozakra Live Portal API Route Handlers", () => {
         new Response(JSON.stringify(overviewPayload), {
           status: 200,
           headers: { "Content-Type": "application/json" },
-        })
+        }),
       );
 
       const first = await overviewGet(makeOverviewReq());
@@ -318,4 +328,3 @@ describe("Mozakra Live Portal API Route Handlers", () => {
     });
   });
 });
-

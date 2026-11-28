@@ -45,7 +45,7 @@ export default function PharmacySystemPage() {
       {/* Title */}
       <header className="mt-6 grid grid-cols-12 gap-6">
         <div className="col-span-12 lg:col-span-9">
-          <h1 className="text-4xl font-medium sm:text-5xl">Dawaa Pharmacy</h1>
+          <h1 className="text-3xl font-semibold tracking-[-0.03em] sm:text-5xl">Dawaa Pharmacy</h1>
           <p className="mt-3 text-lg text-muted">
             WhatsApp pharmacy ordering: AI reads requests and prescriptions, auto-reserves safe
             orders, and routes the rest to a pharmacist on Telegram.

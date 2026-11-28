@@ -65,7 +65,7 @@ export default function HrSystemPage() {
       <header className="mt-6 grid grid-cols-12 gap-6">
         <div className="col-span-12 lg:col-span-8">
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-4xl font-medium sm:text-5xl">HR Demo</h1>
+            <h1 className="text-3xl font-semibold tracking-[-0.03em] sm:text-5xl">HR Demo</h1>
           </div>
           <p className="mt-3 text-lg text-muted">AI-powered HR for candidates and recruiters</p>
           <div className="mt-5 flex flex-wrap gap-1.5">

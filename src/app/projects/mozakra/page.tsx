@@ -124,7 +124,7 @@ export default function MozakraPage() {
       {/* 1. Hero */}
       <header className="mt-6 grid grid-cols-12 gap-6">
         <div className="col-span-12 lg:col-span-9">
-          <h1 className="text-4xl font-medium sm:text-5xl">
+          <h1 className="text-3xl font-semibold tracking-[-0.03em] sm:text-5xl">
             Mozakra · AI Study Coach
           </h1>
           <p className="mt-3 text-lg leading-relaxed text-muted">
@@ -349,13 +349,7 @@ export default function MozakraPage() {
   );
 }
 
-function HoodCard({
-  title,
-  children,
-}: {
-  title: string;
-  children: ReactNode;
-}) {
+function HoodCard({ title, children }: { title: string; children: ReactNode }) {
   return (
     <article className="rounded-[var(--radius-card)] border border-border bg-surface p-5">
       <h3 className="text-lg font-medium text-text">{title}</h3>
@@ -363,4 +357,3 @@ function HoodCard({
     </article>
   );
 }
-

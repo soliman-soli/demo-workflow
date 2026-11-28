@@ -136,7 +136,7 @@ export default function FenjanCafePage() {
       {/* 1. Hero */}
       <header className="mt-6 grid grid-cols-12 items-center gap-8">
         <div className="col-span-12 lg:col-span-7">
-          <h1 className="text-4xl font-medium sm:text-5xl">
+          <h1 className="text-3xl font-semibold tracking-[-0.03em] sm:text-5xl">
             Order your coffee in a DM
           </h1>
           <p

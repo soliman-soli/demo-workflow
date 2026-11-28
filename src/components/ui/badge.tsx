@@ -7,10 +7,10 @@ export type Tone = "neutral" | "accent" | "success" | "warning" | "danger" | "in
 const tones: Record<Tone, string> = {
   neutral: "bg-surface-2 text-muted border-border",
   accent: "bg-accent/10 text-accent border-accent/25",
-  success: "bg-success/12 text-success-text border-success/25",
-  warning: "bg-warning/12 text-warning-text border-warning/30",
-  danger: "bg-danger/12 text-danger-text border-danger/25",
-  info: "bg-info/12 text-info-text border-info/25",
+  success: "bg-success/10 text-success-text border-success/25",
+  warning: "bg-warning/10 text-warning-text border-warning/30",
+  danger: "bg-danger/10 text-danger-text border-danger/25",
+  info: "bg-info/10 text-info-text border-info/25",
 };
 
 export function Badge({
@@ -21,7 +21,7 @@ export function Badge({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs font-medium whitespace-nowrap",
+        "inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-xs font-medium whitespace-nowrap",
         tones[tone],
         className
       )}
@@ -39,7 +39,11 @@ export function scoreTone(score: number | null): Tone {
 
 export function ScoreBadge({ score, className }: { score: number | null; className?: string }) {
   return (
-    <Badge tone={scoreTone(score)} className={cn("tabular-nums", className)} aria-label={score === null ? "No score" : `Score ${score} of 100`}>
+    <Badge
+      tone={scoreTone(score)}
+      className={cn("font-mono tabular-nums", className)}
+      aria-label={score === null ? "No score" : `Score ${score} of 100`}
+    >
       {score === null ? "—" : score}
     </Badge>
   );
@@ -65,11 +69,21 @@ export function StatusBadge({ status }: { status: CandidateStatus }) {
   return <Badge tone={STATUS_TONE[status]}>{STATUS_LABEL[status]}</Badge>;
 }
 
-export function Tag({ children }: { children: React.ReactNode }) {
+export function Tag({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
   return (
-    <span className="inline-flex items-center rounded-md bg-surface-2 px-2 py-0.5 text-xs text-muted">
+    <span
+      className={cn(
+        "inline-flex items-center rounded-md border border-border/80 bg-surface-2/80 px-2 py-0.5 font-mono text-[11px] font-medium text-muted",
+        className
+      )}
+    >
       {children}
     </span>
   );
 }
-
