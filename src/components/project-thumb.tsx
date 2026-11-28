@@ -4,6 +4,7 @@ export type ProjectMotif =
   | "hr"
   | "pharmacy"
   | "cafe"
+  | "study"
   | "dashboard"
   | "island"
   | "video";
@@ -209,6 +210,116 @@ export function ProjectThumb({
             fill={clay}
             stroke="none"
             opacity="0.85"
+          />
+        </g>
+      )}
+      {motif === "study" && (
+        <g fill="none" strokeWidth="1.5">
+          {/* Lecture document / PDF */}
+          <rect
+            x="56"
+            y="42"
+            width="94"
+            height="96"
+            rx="10"
+            stroke={stroke}
+            opacity="0.5"
+          />
+          <line
+            x1="72"
+            y1="66"
+            x2="120"
+            y2="66"
+            stroke={stroke}
+            opacity="0.5"
+          />
+          <line
+            x1="72"
+            y1="82"
+            x2="134"
+            y2="82"
+            stroke={stroke}
+            opacity="0.35"
+          />
+          <line
+            x1="72"
+            y1="98"
+            x2="118"
+            y2="98"
+            stroke={stroke}
+            opacity="0.35"
+          />
+          <line
+            x1="72"
+            y1="114"
+            x2="128"
+            y2="114"
+            stroke={stroke}
+            opacity="0.25"
+          />
+          <circle
+            cx="132"
+            cy="60"
+            r="4"
+            fill={clay}
+            stroke="none"
+            opacity="0.85"
+          />
+          {/* Validation check node */}
+          <path d="M150 90 H188" stroke={accent} strokeDasharray="4 4" />
+          <circle cx="204" cy="90" r="16" stroke={accent} />
+          <path d="M197 90 l5 5 l10 -10" stroke={accent} strokeWidth="2" />
+          <path d="M220 90 H244" stroke={stroke} opacity="0.45" />
+          {/* 4-box Leitner spaced-repetition progression */}
+          <rect
+            x="250"
+            y="106"
+            width="20"
+            height="32"
+            rx="4"
+            stroke={clay}
+            opacity="0.85"
+          />
+          <circle
+            cx="260"
+            cy="96"
+            r="4"
+            fill={clay}
+            stroke="none"
+            opacity="0.85"
+          />
+          <rect
+            x="278"
+            y="88"
+            width="20"
+            height="50"
+            rx="4"
+            stroke={stroke}
+            opacity="0.5"
+          />
+          <rect
+            x="306"
+            y="70"
+            width="20"
+            height="68"
+            rx="4"
+            stroke={stroke}
+            opacity="0.5"
+          />
+          <rect x="334" y="50" width="20" height="88" rx="4" stroke={accent} />
+          <path
+            d="M260 88 Q298 34 344 42"
+            stroke={accent}
+            strokeDasharray="3 3"
+            opacity="0.85"
+          />
+          <line
+            x1="244"
+            y1="142"
+            x2="360"
+            y2="142"
+            stroke={stroke}
+            opacity="0.35"
           />
         </g>
       )}
